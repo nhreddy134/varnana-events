@@ -57,6 +57,7 @@ function Hero() {
           </div>
         </Suspense>
       </ClientOnly>
+      <HeroOrbs />
 
       <motion.div style={{ y }} className="container-prose relative z-10 pt-32 pb-24 grid md:grid-cols-12 gap-10 items-center">
         <div className="md:col-span-7">
