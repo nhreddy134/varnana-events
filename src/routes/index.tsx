@@ -285,7 +285,7 @@ function GalleryPreview() {
         <div className="mt-12 rounded-2xl bg-burgundy-deep/95 overflow-hidden">
           <ClientOnly fallback={<div className="h-[520px]" />}>
             <Suspense fallback={<div className="h-[520px]" />}>
-              <GalleryCarousel3D />
+              <GalleryCarousel />
             </Suspense>
           </ClientOnly>
         </div>
