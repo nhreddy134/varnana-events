@@ -5,9 +5,10 @@ import { ArrowRight, ArrowUpRight, Quote } from "lucide-react";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { Counter } from "@/components/site/Counter";
 import { ClientOnly } from "@/components/site/ClientOnly";
+import { HeroOrbs } from "@/components/site/HeroOrbs";
+import { GalleryCarousel } from "@/components/site/GalleryCarousel";
 
 const HeroParticles = lazy(() => import("@/components/three/HeroParticles").then(m => ({ default: m.HeroParticles })));
-const GalleryCarousel3D = lazy(() => import("@/components/three/GalleryCarousel3D").then(m => ({ default: m.GalleryCarousel3D })));
 const OrbitalRings = lazy(() => import("@/components/three/OrbitalRings").then(m => ({ default: m.OrbitalRings })));
 const CTAParticles = lazy(() => import("@/components/three/CTAParticles").then(m => ({ default: m.CTAParticles })));
 
