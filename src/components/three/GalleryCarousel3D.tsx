@@ -60,8 +60,6 @@ export function GalleryCarousel3D() {
   const last = useRef(0);
   const [auto, setAuto] = useState(true);
 
-  useFrame: void 0;
-
   return (
     <div
       className="w-full h-[520px] cursor-grab active:cursor-grabbing select-none"
