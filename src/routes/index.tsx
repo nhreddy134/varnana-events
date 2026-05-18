@@ -7,10 +7,39 @@ import { Counter } from "@/components/site/Counter";
 import { ClientOnly } from "@/components/site/ClientOnly";
 import { HeroOrbs } from "@/components/site/HeroOrbs";
 import { GalleryCarousel } from "@/components/site/GalleryCarousel";
+import { StoryUnfoldsResponsive } from "@/components/site/StoryUnfoldsResponsive";
+import { HorizontalMarquee, TextReveal, ScaleOnScroll } from "@/components/site/ScrollEffects";
 
 const HeroParticles = lazy(() => import("@/components/three/HeroParticles").then(m => ({ default: m.HeroParticles })));
 const OrbitalRings = lazy(() => import("@/components/three/OrbitalRings").then(m => ({ default: m.OrbitalRings })));
 const CTAParticles = lazy(() => import("@/components/three/CTAParticles").then(m => ({ default: m.CTAParticles })));
+
+const AnimatedHeadingWords = ({ text, delay = 0 }: { text: string; delay?: number }) => {
+  return (
+    <motion.span
+      initial="hidden"
+      animate="show"
+      variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: delay } } }}
+      className="inline-block"
+    >
+      {text.split(" ").map((w, i) => (
+        <motion.span
+          key={i}
+          className="inline-block mr-[0.25em]"
+          variants={{
+            hidden: { opacity: 0, y: 40, filter: "blur(12px)" },
+            show: {
+              opacity: 1, y: 0, filter: "blur(0px)",
+              transition: { type: "spring", stiffness: 60, damping: 18 },
+            },
+          }}
+        >
+          {w}
+        </motion.span>
+      ))}
+    </motion.span>
+  );
+};
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -31,9 +60,11 @@ function HomePage() {
   return (
     <>
       <Hero />
+      <StoryUnfoldsResponsive />
       <CategoriesStrip />
       <FeaturedServices />
       <GalleryPreview />
+      <HorizontalMarquee />
       <WhyVarnana />
       <ProcessTimeline />
       <Testimonials />
@@ -136,32 +167,7 @@ function Hero() {
   );
 }
 
-function AnimatedHeadingWords({ text, delay = 0 }: { text: string; delay?: number }) {
-  return (
-    <motion.span
-      initial="hidden"
-      animate="show"
-      variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: delay } } }}
-      className="inline-block"
-    >
-      {text.split(" ").map((w, i) => (
-        <motion.span
-          key={i}
-          className="inline-block mr-[0.25em]"
-          variants={{
-            hidden: { opacity: 0, y: 40, filter: "blur(12px)" },
-            show: {
-              opacity: 1, y: 0, filter: "blur(0px)",
-              transition: { type: "spring", stiffness: 60, damping: 18 },
-            },
-          }}
-        >
-          {w}
-        </motion.span>
-      ))}
-    </motion.span>
-  );
-}
+
 
 /* ---------------- CATEGORIES ---------------- */
 const CATEGORIES = [

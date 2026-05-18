@@ -12,6 +12,7 @@ import appCss from "../styles.css?url";
 import { Navbar } from "@/components/site/Navbar";
 import { Footer } from "@/components/site/Footer";
 import { SplashScreen } from "@/components/site/SplashScreen";
+import { ProgressIndicator } from "@/components/site/ScrollEffects";
 
 function NotFoundComponent() {
   return (
@@ -119,6 +120,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <SplashScreen />
+      <ProgressIndicator />
       <Navbar />
       <main className="min-h-screen">
         <Outlet />
