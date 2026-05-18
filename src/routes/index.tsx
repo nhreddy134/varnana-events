@@ -5,9 +5,10 @@ import { ArrowRight, ArrowUpRight, Quote } from "lucide-react";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { Counter } from "@/components/site/Counter";
 import { ClientOnly } from "@/components/site/ClientOnly";
+import { HeroOrbs } from "@/components/site/HeroOrbs";
+import { GalleryCarousel } from "@/components/site/GalleryCarousel";
 
 const HeroParticles = lazy(() => import("@/components/three/HeroParticles").then(m => ({ default: m.HeroParticles })));
-const GalleryCarousel3D = lazy(() => import("@/components/three/GalleryCarousel3D").then(m => ({ default: m.GalleryCarousel3D })));
 const OrbitalRings = lazy(() => import("@/components/three/OrbitalRings").then(m => ({ default: m.OrbitalRings })));
 const CTAParticles = lazy(() => import("@/components/three/CTAParticles").then(m => ({ default: m.CTAParticles })));
 
@@ -56,6 +57,7 @@ function Hero() {
           </div>
         </Suspense>
       </ClientOnly>
+      <HeroOrbs />
 
       <motion.div style={{ y }} className="container-prose relative z-10 pt-32 pb-24 grid md:grid-cols-12 gap-10 items-center">
         <div className="md:col-span-7">
@@ -284,7 +286,7 @@ function GalleryPreview() {
         <div className="mt-12 rounded-2xl bg-burgundy-deep/95 overflow-hidden">
           <ClientOnly fallback={<div className="h-[520px]" />}>
             <Suspense fallback={<div className="h-[520px]" />}>
-              <GalleryCarousel3D />
+              <GalleryCarousel />
             </Suspense>
           </ClientOnly>
         </div>

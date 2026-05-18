@@ -16,21 +16,19 @@ function Particles() {
   const mouse = useRef(new THREE.Vector2(0, 0));
   const { viewport } = useThree();
 
-  const { positions, colors, baseY } = useMemo(() => {
+  const { positions, colors } = useMemo(() => {
     const positions = new Float32Array(count * 3);
     const colors = new Float32Array(count * 3);
-    const baseY = new Float32Array(count);
     const burgundy = new THREE.Color("#6B1A1A");
     const gold = new THREE.Color("#C4A882");
     for (let i = 0; i < count; i++) {
       positions[i * 3] = (Math.random() - 0.5) * 12;
       positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
       positions[i * 3 + 2] = (Math.random() - 0.5) * 4;
-      baseY[i] = positions[i * 3 + 1];
       const c = Math.random() > 0.5 ? gold : burgundy;
       colors[i * 3] = c.r; colors[i * 3 + 1] = c.g; colors[i * 3 + 2] = c.b;
     }
-    return { positions, colors, baseY };
+    return { positions, colors };
   }, [count]);
 
   useEffect(() => {
@@ -75,37 +73,11 @@ function Particles() {
   );
 }
 
-function Orbs() {
-  const refs = [useRef<THREE.Mesh>(null!), useRef<THREE.Mesh>(null!), useRef<THREE.Mesh>(null!), useRef<THREE.Mesh>(null!)];
-  useFrame((s) => {
-    const t = s.clock.elapsedTime;
-    refs.forEach((r, i) => {
-      if (r.current) {
-        r.current.position.y = Math.sin(t * 0.2 + i) * 0.4 + (i - 1.5) * 1.2;
-        r.current.position.x = 3 + Math.cos(t * 0.15 + i) * 0.4;
-      }
-    });
-  });
-  const colors = ["#6B1A1A", "#C4A882", "#3D0F0F", "#D4B896"];
-  const sizes = [1.4, 0.9, 1.1, 0.7];
-  return (
-    <>
-      {refs.map((r, i) => (
-        <mesh key={i} ref={r} position={[3, (i - 1.5) * 1.2, -2]}>
-          <sphereGeometry args={[sizes[i], 32, 32]} />
-          <meshBasicMaterial color={colors[i]} transparent opacity={0.12} />
-        </mesh>
-      ))}
-    </>
-  );
-}
-
 export function HeroParticles() {
   return (
     <Canvas dpr={[1, 1.5]} camera={{ position: [0, 0, 6], fov: 60 }} className="!absolute inset-0">
       <Suspense fallback={null}>
         <Particles />
-        <Orbs />
       </Suspense>
     </Canvas>
   );
