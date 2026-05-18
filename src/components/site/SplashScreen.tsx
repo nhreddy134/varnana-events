@@ -207,7 +207,7 @@ export function SplashScreen() {
               </motion.svg>
             )}
 
-            {/* ============ BREATHING PULSE ============ */
+            {/* ============ BREATHING PULSE ============ */}
             {(stage === "breathe" || stage === "exit") && (
               <motion.div
                 className="absolute inset-0 pointer-events-none"
