@@ -6,7 +6,7 @@ import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { ClientOnly } from "@/components/site/ClientOnly";
 import { HeroOrbs } from "@/components/site/HeroOrbs";
 import { GalleryCarousel } from "@/components/site/GalleryCarousel";
-import { StoryUnfolds3D } from "@/components/site/StoryUnfolds3D";
+import ScrollScrubSequence from "@/components/site/ScrollScrubSequence";
 import { GalleryWithLightbox } from "@/components/site/GalleryWithLightbox";
 import { HorizontalMarquee } from "@/components/site/ScrollEffects";
 import { ServicesEnhanced } from "@/components/site/ServicesEnhanced";
@@ -109,7 +109,7 @@ function HomePage() {
       </AnimatePresence>
 
       <Hero />
-      <StoryUnfolds3D />
+      <ScrollScrubSequence />
       <CategoriesStrip />
       <ServicesEnhanced />
       <GalleryWithLightbox />
