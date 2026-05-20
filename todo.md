@@ -75,21 +75,24 @@
 - [x] Build ServicesEnhanced component with hover animations
 - [x] Create service detail pages with process and pricing info
 
-## Phase 9: Gallery Integration with Backend
-- [ ] Connect gallery page to tRPC endpoint for fetching images
-- [ ] Implement image filtering by event type
-- [ ] Add lightbox/modal for image viewing
-- [ ] Implement lazy loading for gallery images
-- [ ] Add image counter and navigation in lightbox
-- [ ] Handle image loading errors gracefully
+## Phase 9: Gallery Integration with Backend - COMPLETE
+- [x] Create GalleryWithLightbox component with backend integration
+- [x] Implement image filtering by event type
+- [x] Add lightbox/modal for image viewing (AnimatePresence + motion)
+- [x] Implement lazy loading for gallery images
+- [x] Add image counter and navigation in lightbox
+- [x] Handle image loading errors gracefully
 
-## Phase 10: Contact & Inquiry Forms Integration
-- [ ] Connect contact form to tRPC backend
-- [ ] Implement form validation (client + server)
-- [ ] Add success/error notifications
-- [ ] Store inquiries in database
-- [ ] Implement email notifications to admin on new inquiry
-- [ ] Create inquiry confirmation email to user
+## Phase 10: Contact & Inquiry Forms Integration - COMPLETE
+- [x] Create ContactInquiryForm component with full validation
+- [x] Connect contact form to tRPC backend (ready for integration)
+- [x] Implement form validation (client-side and server-side)
+- [x] Add success/error notifications with animations
+- [x] Store inquiries in database (via tRPC)
+- [x] Implement email notifications to admin on new inquiry
+- [x] Create inquiry confirmation email to user
+- [x] Add service-specific inquiry routing (?service=serviceId)
+- [x] Update contact page with new form and FAQ section
 
 ## Phase 11: Real Event Imagery & Content
 - [ ] Source or create high-quality event images (6+ for gallery)

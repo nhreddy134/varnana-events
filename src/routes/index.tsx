@@ -9,6 +9,7 @@ import { HeroOrbs } from "@/components/site/HeroOrbs";
 import { GalleryCarousel } from "@/components/site/GalleryCarousel";
 import { StoryUnfoldsResponsive } from "@/components/site/StoryUnfoldsResponsive";
 import { StoryUnfolds3D } from "@/components/site/StoryUnfolds3D";
+import { GalleryWithLightbox } from "@/components/site/GalleryWithLightbox";
 import { HorizontalMarquee, TextReveal, ScaleOnScroll } from "@/components/site/ScrollEffects";
 import { ServicesEnhanced } from "@/components/site/ServicesEnhanced";
 
@@ -67,7 +68,8 @@ function HomePage() {
       <CategoriesStrip />
       <ServicesEnhanced />
       {/* <FeaturedServices /> */}
-      <GalleryPreview />
+      <GalleryWithLightbox />
+      {/* <GalleryPreview /> */}
       <HorizontalMarquee />
       <WhyVarnana />
       <ProcessTimeline />
