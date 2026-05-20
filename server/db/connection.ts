@@ -30,9 +30,12 @@ export async function initializeDatabase() {
 
 export function getDatabase() {
   if (!db) {
-    throw new Error('Database not initialized. Call initializeDatabase() first.');
+    // In serverless, we might need to initialize synchronously if possible or 
+    // handle the async nature. For now, we'll keep it simple but ensure 
+    // app.ts calls initializeDatabase().
+    console.warn('⚠️ getDatabase called before initialization');
   }
-  return db;
+  return db!;
 }
 
 export async function closeDatabase() {

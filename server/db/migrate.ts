@@ -1,32 +1,37 @@
 import { migrate } from 'drizzle-orm/mysql2/migrator';
-import mysql from 'mysql2/promise';
-import { drizzle } from 'drizzle-orm/mysql2';
-import dotenv from 'dotenv';
+import { getDatabase } from './connection';
 import path from 'path';
+import { fileURLToPath } from 'url';
 
-dotenv.config();
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
-async function runMigrations() {
-  const connectionString = process.env.DATABASE_URL;
-  if (!connectionString) {
-    throw new Error('DATABASE_URL environment variable is not set');
+export async function runMigrations() {
+  const db = await getDatabase();
+  if (!db) {
+    console.error('Failed to get database connection for migrations');
+    return;
   }
 
-  console.log('🔄 Starting database migrations...');
-
+  console.log('Running migrations...');
+  
   try {
-    const connection = await mysql.createConnection(connectionString);
-    const db = drizzle(connection);
-
-    const migrationsFolder = path.join(__dirname, 'migrations');
-    await migrate(db, { migrationsFolder });
-
-    console.log('✅ Migrations completed successfully');
-    await connection.end();
+    await migrate(db, { 
+      migrationsFolder: path.join(__dirname, 'migrations') 
+    });
+    console.log('Migrations completed successfully');
   } catch (error) {
-    console.error('❌ Migration failed:', error);
-    process.exit(1);
+    console.error('Migration failed:', error);
+    throw error;
   }
 }
 
-runMigrations();
+// Support direct execution via tsx
+if (import.meta.url.endsWith(process.argv[1]) || process.argv[1]?.includes('migrate.ts')) {
+  runMigrations()
+    .then(() => process.exit(0))
+    .catch((err) => {
+      console.error(err);
+      process.exit(1);
+    });
+}

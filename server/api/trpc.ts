@@ -1,10 +1,10 @@
 import { initTRPC, TRPCError } from '@trpc/server';
 import { CreateExpressContextOptions } from '@trpc/server/adapters/express';
-import { getDatabase } from '../db/connection';
+import { initializeDatabase } from '../db/connection';
 import { verifyToken } from '../middleware/auth';
 
 export const createContext = async ({ req, res }: CreateExpressContextOptions) => {
-  const db = getDatabase();
+  const db = await initializeDatabase();
   const token = req.headers.authorization?.replace('Bearer ', '');
   
   let user: { id: number; email: string; role: string } | null = null;

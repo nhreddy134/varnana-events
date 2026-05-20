@@ -1,13 +1,15 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
 import { useLocation } from '@tanstack/react-router';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
 
 interface FormData {
   name: string;
   email: string;
   phone: string;
-  eventType: string;
+  eventType: any;
   eventDate: string;
   guestCount: string;
   budget: string;
@@ -69,12 +71,19 @@ export const ContactInquiryForm = () => {
         throw new Error('Please fill in all required fields');
       }
 
-      // TODO: Replace with actual tRPC call
-      // const response = await trpc.inquiries.create.mutate(formData);
+      // Convert guestCount to number if provided
+      const submissionData = {
+        ...formData,
+        guestCount: formData.guestCount ? parseInt(formData.guestCount) : undefined,
+        eventDate: formData.eventDate ? new Date(formData.eventDate) : undefined,
+      };
 
-      // Mock submission
-      console.log('Form submitted:', formData);
+      // Call tRPC inquiries.create endpoint
+      await trpc.inquiries.create.mutate(submissionData);
+
       setSubmitted(true);
+      toast.success('Inquiry sent successfully!');
+      
       setFormData({
         name: '',
         email: '',
@@ -86,10 +95,12 @@ export const ContactInquiryForm = () => {
         message: '',
       });
 
-      // Reset success message after 5 seconds
-      setTimeout(() => setSubmitted(false), 5000);
+      // Reset success message after 10 seconds
+      setTimeout(() => setSubmitted(false), 10000);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to submit form');
+      const message = err instanceof Error ? err.message : 'Failed to submit form';
+      setError(message);
+      toast.error(message);
     } finally {
       setLoading(false);
     }
@@ -172,20 +183,27 @@ export const ContactInquiryForm = () => {
             whileInView={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.8 }}
             viewport={{ once: true }}
-            className="bg-white rounded-2xl shadow-xl p-8"
+            className="bg-white rounded-2xl shadow-xl p-8 border border-gray-100"
           >
             {submitted ? (
               <motion.div
-                className="flex flex-col items-center justify-center h-full text-center"
+                className="flex flex-col items-center justify-center h-full text-center py-12"
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
               >
-                <CheckCircle className="text-green-500 mb-4" size={64} />
-                <h3 className="text-2xl font-semibold text-gray-900 mb-2">Thank You!</h3>
-                <p className="text-gray-600 mb-4">
-                  We've received your inquiry and will be in touch within 24 hours.
+                <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mb-6">
+                  <CheckCircle className="text-green-500" size={48} />
+                </div>
+                <h3 className="text-3xl font-display text-burgundy mb-4">Thank You!</h3>
+                <p className="text-lg text-gray-600 mb-8">
+                  We've received your inquiry and will be in touch within 24 hours to discuss your vision.
                 </p>
-                <p className="text-sm text-gray-500">Check your email for confirmation</p>
+                <button 
+                  onClick={() => setSubmitted(false)}
+                  className="text-burgundy font-semibold hover:underline"
+                >
+                  Send another inquiry
+                </button>
               </motion.div>
             ) : (
               <form onSubmit={handleSubmit} className="space-y-6">
@@ -197,95 +215,99 @@ export const ContactInquiryForm = () => {
                     animate={{ opacity: 1, y: 0 }}
                   >
                     <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-                    <p className="text-red-700">{error}</p>
+                    <p className="text-red-700 text-sm">{error}</p>
                   </motion.div>
                 )}
 
-                {/* Name */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Full Name *
-                  </label>
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleChange}
-                    placeholder="Your name"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                    required
-                  />
-                </div>
-
-                {/* Email */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Email Address *
-                  </label>
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="your@email.com"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                    required
-                  />
-                </div>
-
-                {/* Phone */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Phone Number
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="+1 (555) 000-0000"
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                  />
-                </div>
-
-                {/* Event Type */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Event Type *
-                  </label>
-                  <select
-                    name="eventType"
-                    value={formData.eventType}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                    required
-                  >
-                    {eventTypes.map((type) => (
-                      <option key={type} value={type}>
-                        {type}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Event Date */}
-                <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Event Date
-                  </label>
-                  <input
-                    type="date"
-                    name="eventDate"
-                    value={formData.eventDate}
-                    onChange={handleChange}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                  />
-                </div>
-
-                {/* Guest Count & Budget */}
-                <div className="grid grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Name */}
                   <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
+                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                      Full Name *
+                    </label>
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleChange}
+                      placeholder="Your name"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
+                      required
+                    />
+                  </div>
+
+                  {/* Email */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                      Email Address *
+                    </label>
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="your@email.com"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Phone */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                      Phone Number
+                    </label>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+1 (555) 000-0000"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
+                    />
+                  </div>
+
+                  {/* Event Type */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                      Event Type *
+                    </label>
+                    <select
+                      name="eventType"
+                      value={formData.eventType}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
+                      required
+                    >
+                      {eventTypes.map((type) => (
+                        <option key={type} value={type}>
+                          {type}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Event Date */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                      Event Date
+                    </label>
+                    <input
+                      type="date"
+                      name="eventDate"
+                      value={formData.eventDate}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
+                    />
+                  </div>
+
+                  {/* Guest Count */}
+                  <div>
+                    <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
                       Guest Count
                     </label>
                     <input
@@ -294,41 +316,43 @@ export const ContactInquiryForm = () => {
                       value={formData.guestCount}
                       onChange={handleChange}
                       placeholder="Estimated guests"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
+                      className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
                     />
                   </div>
-                  <div>
-                    <label className="block text-sm font-semibold text-gray-900 mb-2">
-                      Budget
-                    </label>
-                    <select
-                      name="budget"
-                      value={formData.budget}
-                      onChange={handleChange}
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                    >
-                      <option value="">Select budget range</option>
-                      {budgetRanges.map((range) => (
-                        <option key={range} value={range}>
-                          {range}
-                        </option>
-                      ))}
-                    </select>
-                  </div>
+                </div>
+
+                {/* Budget */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                    Budget Range
+                  </label>
+                  <select
+                    name="budget"
+                    value={formData.budget}
+                    onChange={handleChange}
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50"
+                  >
+                    <option value="">Select budget range</option>
+                    {budgetRanges.map((range) => (
+                      <option key={range} value={range}>
+                        {range}
+                      </option>
+                    ))}
+                  </select>
                 </div>
 
                 {/* Message */}
                 <div>
-                  <label className="block text-sm font-semibold text-gray-900 mb-2">
-                    Tell us about your vision
+                  <label className="block text-xs font-bold uppercase tracking-widest text-gray-400 mb-2">
+                    Your Vision
                   </label>
                   <textarea
                     name="message"
                     value={formData.message}
                     onChange={handleChange}
-                    placeholder="Share details about your event, style preferences, or any special requests..."
+                    placeholder="Share details about your style, preferences, or any special requests..."
                     rows={4}
-                    className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition resize-none"
+                    className="w-full px-4 py-3 border border-gray-200 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition bg-gray-50/50 resize-none"
                   />
                 </div>
 
@@ -336,25 +360,25 @@ export const ContactInquiryForm = () => {
                 <motion.button
                   type="submit"
                   disabled={loading}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className="w-full px-6 py-3 bg-gradient-to-r from-burgundy to-burgundy/80 text-ivory rounded-lg font-semibold hover:shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                  whileHover={{ scale: 1.01 }}
+                  whileTap={{ scale: 0.99 }}
+                  className="w-full px-6 py-4 bg-burgundy text-ivory rounded-lg font-bold uppercase tracking-widest hover:bg-burgundy-deep shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-3"
                 >
                   {loading ? (
                     <>
-                      <div className="w-5 h-5 border-2 border-ivory border-t-transparent rounded-full animate-spin" />
+                      <Loader2 size={20} className="animate-spin" />
                       Sending...
                     </>
                   ) : (
                     <>
-                      <Send size={20} />
+                      <Send size={18} />
                       Send Inquiry
                     </>
                   )}
                 </motion.button>
 
-                <p className="text-xs text-gray-500 text-center">
-                  We respect your privacy. Your information is secure and will only be used to contact you about your event.
+                <p className="text-[10px] text-gray-400 text-center uppercase tracking-widest">
+                  Personalized response within 24 hours
                 </p>
               </form>
             )}

@@ -1,7 +1,9 @@
 import { createFileRoute, useNavigate } from '@tanstack/react-router';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Lock, Mail } from 'lucide-react';
+import { Lock, Mail, Loader2, ArrowLeft } from 'lucide-react';
+import { trpc } from '@/lib/trpc';
+import { toast } from 'sonner';
 
 export const Route = createFileRoute('/admin/login')({
   head: () => ({
@@ -18,140 +20,132 @@ function AdminLogin() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
+
+  useEffect(() => {
+    // If already logged in, redirect to dashboard
+    const token = localStorage.getItem('authToken');
+    if (token) {
+      navigate({ to: '/admin/dashboard' });
+    }
+  }, [navigate]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError('');
 
     try {
-      // TODO: Call tRPC auth.login endpoint
-      const response = await fetch('/api/trpc/auth.login', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password }),
-      });
-
-      if (!response.ok) {
-        throw new Error('Login failed');
-      }
-
-      const data = await response.json();
-      localStorage.setItem('authToken', data.token);
-      localStorage.setItem('user', JSON.stringify(data.user));
-
+      const response = await trpc.auth.login.mutate({ email, password });
+      
+      localStorage.setItem('authToken', response.token);
+      localStorage.setItem('user', JSON.stringify(response.user));
+      
+      toast.success('Welcome back, ' + response.user.name);
       navigate({ to: '/admin/dashboard' });
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Login failed');
+    } catch (err: any) {
+      console.error('Login failed:', err);
+      toast.error(err.message || 'Invalid credentials. Please try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-burgundy to-burgundy/80 flex items-center justify-center p-4">
+    <div className="min-h-screen bg-burgundy-deep flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background Orbs */}
+      <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gold/10 rounded-full blur-[120px]" />
+      <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-burgundy/20 rounded-full blur-[120px]" />
+
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="w-full max-w-md"
+        transition={{ duration: 0.8 }}
+        className="w-full max-w-md relative z-10"
       >
-        {/* Logo */}
-        <div className="text-center mb-8">
+        {/* Logo Section */}
+        <div className="text-center mb-10">
           <motion.div
-            initial={{ scale: 0 }}
-            animate={{ scale: 1 }}
-            transition={{ type: 'spring', stiffness: 100 }}
+            initial={{ scale: 0, rotate: -20 }}
+            animate={{ scale: 1, rotate: 0 }}
+            transition={{ type: 'spring', stiffness: 100, delay: 0.2 }}
             className="inline-block"
           >
-            <div className="w-16 h-16 bg-gold rounded-full flex items-center justify-center mb-4 mx-auto">
-              <span className="text-3xl font-bold text-burgundy">V</span>
+            <div className="w-20 h-20 bg-gold rounded-full flex items-center justify-center mb-6 mx-auto shadow-2xl shadow-gold/20 border-4 border-ivory/10">
+              <span className="text-4xl font-display text-burgundy-deep">V</span>
             </div>
           </motion.div>
-          <h1 className="text-4xl font-display text-ivory mb-2">Varnana Events</h1>
-          <p className="text-ivory/80">Admin Portal</p>
+          <h1 className="text-4xl font-display text-ivory mb-2 tracking-tight">Varnana Events</h1>
+          <p className="text-gold/60 uppercase tracking-[0.3em] text-[10px] font-bold">Administrative Portal</p>
         </div>
 
-        {/* Login Form */}
-        <motion.form
-          onSubmit={handleLogin}
-          className="bg-white rounded-lg shadow-2xl p-8 space-y-6"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.2 }}
+        {/* Form Card */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.4 }}
+          className="bg-white rounded-2xl shadow-2xl p-8 md:p-10 border border-ivory/10"
         >
-          {error && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-lg text-sm"
+          <form onSubmit={handleLogin} className="space-y-6">
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Email Address</label>
+              <div className="relative">
+                <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="admin@varnana-events.com"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-burgundy outline-none transition bg-gray-50/50"
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-[10px] font-bold uppercase tracking-widest text-gray-400">Security Password</label>
+              <div className="relative">
+                <Lock className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-300" size={18} />
+                <input
+                  type="password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="••••••••"
+                  className="w-full pl-10 pr-4 py-3 border border-gray-100 rounded-xl focus:ring-2 focus:ring-burgundy outline-none transition bg-gray-50/50"
+                  required
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full bg-burgundy-deep hover:bg-burgundy text-ivory font-bold py-4 rounded-xl transition-all duration-300 shadow-xl shadow-burgundy/20 disabled:opacity-50 flex items-center justify-center gap-3 uppercase tracking-widest text-xs"
             >
-              {error}
-            </motion.div>
-          )}
+              {loading ? <Loader2 size={18} className="animate-spin" /> : null}
+              {loading ? 'Authenticating...' : 'Sign In'}
+            </button>
+          </form>
 
-          {/* Email Field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Email Address</label>
-            <div className="relative">
-              <Mail className="absolute left-3 top-3 text-gray-400" size={20} />
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@varnana.com"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Password Field */}
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">Password</label>
-            <div className="relative">
-              <Lock className="absolute left-3 top-3 text-gray-400" size={20} />
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="••••••••"
-                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-burgundy focus:border-transparent outline-none transition"
-                required
-              />
-            </div>
-          </div>
-
-          {/* Login Button */}
-          <motion.button
-            type="submit"
-            disabled={loading}
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            className="w-full bg-burgundy hover:bg-burgundy/90 text-white font-semibold py-2 rounded-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {loading ? 'Logging in...' : 'Login'}
-          </motion.button>
-
-          {/* Back to Home */}
-          <div className="text-center pt-4 border-t border-gray-200">
-            <a href="/" className="text-burgundy hover:text-burgundy/80 text-sm font-medium">
-              ← Back to Home
+          <div className="mt-10 pt-6 border-t border-gray-50 text-center">
+            <a 
+              href="/" 
+              className="inline-flex items-center gap-2 text-gray-400 hover:text-burgundy text-[10px] font-bold uppercase tracking-widest transition-colors"
+            >
+              <ArrowLeft size={14} /> Return to Website
             </a>
           </div>
-        </motion.form>
+        </motion.div>
 
-        {/* Demo Credentials */}
+        {/* Demo Note */}
         <motion.div
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
-          transition={{ delay: 0.4 }}
-          className="mt-6 bg-white/10 backdrop-blur border border-white/20 rounded-lg p-4 text-ivory text-sm"
+          transition={{ delay: 0.8 }}
+          className="mt-8 text-center"
         >
-          <p className="font-semibold mb-2">Demo Credentials:</p>
-          <p>Email: admin@varnana.com</p>
-          <p>Password: demo123456</p>
+          <p className="text-ivory/30 text-[10px] uppercase tracking-widest leading-relaxed">
+            Authorized access only. All activities are logged.<br />
+            © 2026 Varnana Events Studio
+          </p>
         </motion.div>
       </motion.div>
     </div>
