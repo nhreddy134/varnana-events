@@ -2,7 +2,9 @@ import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { ContactInquiryForm } from "@/components/site/ContactInquiryForm";
-import { Mail, Phone, MapPin, ArrowRight } from "lucide-react";
+import { Mail, Phone, MapPin, Loader2, Globe } from "lucide-react";
+import { useEffect, useState } from "react";
+import { trpc } from "@/lib/trpc";
 
 export const Route = createFileRoute("/contact")({
   head: () => ({
@@ -17,87 +19,132 @@ export const Route = createFileRoute("/contact")({
 });
 
 function Contact() {
+  const [contactInfo, setContactInfo] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchContact = async () => {
+      try {
+        const data = await trpc.contact.get.query();
+        setContactInfo(data);
+      } catch (error) {
+        console.error("Failed to fetch contact info:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchContact();
+  }, []);
+
   return (
-    <>
-      <section className="bg-gradient-to-br from-burgundy to-burgundy/80 pt-40 pb-16">
-        <div className="container-prose">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-gold mb-6">— Begin —</p>
+    <div className="bg-ivory min-h-screen">
+      <section className="bg-burgundy-deep pt-40 pb-24 relative overflow-hidden">
+        {/* Decorative Orbs */}
+        <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-gold/10 rounded-full blur-[120px]" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[40%] h-[40%] bg-burgundy/20 rounded-full blur-[120px]" />
+
+        <div className="container-prose relative z-10">
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-[11px] uppercase tracking-[0.4em] text-gold mb-6"
+          >
+            — Begin Your Story —
+          </motion.p>
           <AnimatedHeading
             as="h1"
             text="Tell us about your event."
             className="font-display text-[clamp(2.4rem,6vw,5rem)] leading-[1.05] text-ivory"
           />
-          <p className="mt-8 max-w-2xl text-ivory/75 text-lg leading-relaxed">
-            Share a few details and we'll reply within two working days. We take on a limited number of events each season.
-          </p>
-        </div>
-      </section>
-
-      <section className="bg-white pb-32">
-        <div className="container-prose">
-          <ContactInquiryForm />
-        </div>
-      </section>
-
-      <section className="bg-ivory pb-32">
-        <div className="container-prose grid md:grid-cols-12 gap-12">
-          <motion.form
-            initial={{ opacity: 0, y: 30 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true }}
-            transition={{ type: "spring", stiffness: 60, damping: 18 }}
-            onSubmit={(e) => { e.preventDefault(); alert("Thank you — we'll be in touch within two working days."); }}
-            className="md:col-span-7 space-y-8"
+          <motion.p 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.5 }}
+            className="mt-8 max-w-2xl text-ivory/70 text-lg leading-relaxed font-light"
           >
-            {[
-              { label: "Your Name", type: "text", name: "name" },
-              { label: "Email", type: "email", name: "email" },
-              { label: "Event Type & Date", type: "text", name: "event" },
-            ].map((f) => (
-              <div key={f.name}>
-                <label className="block text-[10px] uppercase tracking-[0.3em] text-mute mb-3">{f.label}</label>
-                <input
-                  type={f.type}
-                  name={f.name}
-                  required
-                  className="w-full bg-transparent border-b border-burgundy/30 focus:border-burgundy outline-none py-3 text-lg text-burgundy placeholder:text-mute/50 transition"
-                />
-              </div>
-            ))}
-            <div>
-              <label className="block text-[10px] uppercase tracking-[0.3em] text-mute mb-3">A Few Words</label>
-              <textarea
-                rows={5}
-                required
-                className="w-full bg-transparent border-b border-burgundy/30 focus:border-burgundy outline-none py-3 text-lg text-burgundy resize-none transition"
-              />
-            </div>
-            <motion.button
-              whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}
-              type="submit"
-              className="inline-flex items-center gap-2 rounded-full bg-burgundy px-8 py-4 text-[12px] uppercase tracking-[0.22em] text-ivory hover:bg-burgundy/90 transition"
-            >
-              Send Inquiry <ArrowRight size={16} />
-            </motion.button>
-          </motion.form>
+            Share a few details and we'll reply within two working days. We take on a limited number of events each season to ensure editorial care for every client.
+          </motion.p>
+        </div>
+      </section>
 
-          <aside className="md:col-span-5 md:pl-12 md:border-l border-beige space-y-8">
-            {[
-              { Icon: Mail, label: "Email", value: "hello@varnana-events.com" },
-              { Icon: Phone, label: "Phone", value: "+1 (555) 123-4567" },
-              { Icon: MapPin, label: "Studio", value: "New York, NY 10001" },
-            ].map(({ Icon, label, value }) => (
-              <div key={label} className="flex items-start gap-4">
-                <span className="mt-1 h-10 w-10 rounded-full bg-gold/20 flex items-center justify-center text-burgundy">
-                  <Icon size={16} />
-                </span>
-                <div>
-                  <div className="text-[10px] uppercase tracking-[0.3em] text-gray-500">{label}</div>
-                  <div className="mt-1 font-display text-xl text-burgundy">{value}</div>
+      <section className="py-32">
+        <div className="container-prose grid md:grid-cols-12 gap-20">
+          <div className="md:col-span-7">
+            <ContactInquiryForm />
+          </div>
+
+          <aside className="md:col-span-5 space-y-12">
+            <div>
+              <h3 className="text-[10px] uppercase tracking-[0.4em] text-gold font-bold mb-8">— Studio Details —</h3>
+              {loading ? (
+                <div className="flex items-center gap-3 text-mute">
+                  <Loader2 size={16} className="animate-spin" />
+                  <span className="text-[10px] uppercase tracking-widest">Loading...</span>
                 </div>
-              </div>
-            ))}
+              ) : (
+                <div className="space-y-10">
+                  <ContactItem 
+                    Icon={Mail} 
+                    label="Email" 
+                    value={contactInfo?.email || "hello@varnana-events.com"} 
+                    href={`mailto:${contactInfo?.email || "hello@varnana-events.com"}`}
+                  />
+                  <ContactItem 
+                    Icon={Phone} 
+                    label="Phone" 
+                    value={contactInfo?.phone || "+1 (555) 123-4567"} 
+                    href={`tel:${contactInfo?.phone}`}
+                  />
+                  <ContactItem 
+                    Icon={MapPin} 
+                    label="Studio" 
+                    value={contactInfo?.address || "New York, NY 10001"} 
+                  />
+                  {contactInfo?.socialLinks?.instagram && (
+                    <ContactItem 
+                      Icon={Globe} 
+                      label="Instagram" 
+                      value={`@${contactInfo.socialLinks.instagram.split('/').pop()}`} 
+                      href={contactInfo.socialLinks.instagram}
+                    />
+                  )}
+                </div>
+              )}
+            </div>
+
+            <div className="pt-12 border-t border-beige">
+              <p className="text-sm text-ink/60 leading-relaxed italic">
+                "We believe that true luxury is not about excess, but about the quiet intention behind every choice."
+              </p>
+            </div>
           </aside>
         </div>
       </section>
-    </>
+    </div>
+  );
+}
+
+function ContactItem({ Icon, label, value, href }: any) {
+  return (
+    <motion.div 
+      initial={{ opacity: 0, x: 20 }}
+      whileInView={{ opacity: 1, x: 0 }}
+      viewport={{ once: true }}
+      className="flex items-start gap-6 group"
+    >
+      <span className="mt-1 h-12 w-12 rounded-full bg-burgundy-deep/5 flex items-center justify-center text-burgundy transition-colors group-hover:bg-burgundy group-hover:text-ivory">
+        <Icon size={18} />
+      </span>
+      <div>
+        <div className="text-[10px] uppercase tracking-[0.3em] text-mute font-bold mb-1">{label}</div>
+        {href ? (
+          <a href={href} className="font-display text-2xl text-burgundy hover:text-gold transition-colors">
+            {value}
+          </a>
+        ) : (
+          <div className="font-display text-2xl text-burgundy">{value}</div>
+        )}
+      </div>
+    </motion.div>
   );
 }
