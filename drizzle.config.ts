@@ -6,9 +6,9 @@ dotenv.config();
 export default defineConfig({
   schema: './server/db/schema.ts',
   out: './server/db/migrations',
-  driver: 'mysql2',
+  dialect: 'mysql',
   dbCredentials: {
-    connectionString: process.env.DATABASE_URL || 'mysql://user:password@localhost:3306/varnana_events',
+    url: process.env.DATABASE_URL || 'mysql://user:password@localhost:3306/varnana_events',
   },
   verbose: true,
   strict: true,
