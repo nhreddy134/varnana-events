@@ -1,6 +1,6 @@
 import { motion } from 'framer-motion';
 import { useNavigate } from '@tanstack/react-router';
-import { Heart, Users, Briefcase, Cake, Gift, Music } from 'lucide-react';
+import { Heart, Users, Briefcase, Cake, Gift, Music, ArrowUpRight } from 'lucide-react';
 
 interface Service {
   id: string;
@@ -157,22 +157,18 @@ export const ServicesEnhanced = () => {
                   </div>
 
                   {/* Buttons */}
-                  <div className="flex gap-3">
+                  <div className="mt-auto">
                     <motion.button
                       onClick={() => handleLearnMore(service.id)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className="flex-1 px-4 py-2 bg-gray-100 text-burgundy rounded-lg font-semibold hover:bg-gray-200 transition"
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      className="w-full group/btn relative flex items-center justify-center gap-2 px-6 py-3 bg-burgundy text-ivory rounded-full font-display tracking-[0.2em] text-[11px] uppercase overflow-hidden transition-all duration-500"
                     >
-                      Learn More
-                    </motion.button>
-                    <motion.button
-                      onClick={() => handleInquiry(service.id)}
-                      whileHover={{ scale: 1.05 }}
-                      whileTap={{ scale: 0.95 }}
-                      className={`flex-1 px-4 py-2 bg-gradient-to-r ${service.color} text-white rounded-lg font-semibold hover:shadow-lg transition`}
-                    >
-                      Inquire
+                      <span className="relative z-10">Explore {service.title}</span>
+                      <ArrowUpRight size={14} className="relative z-10 group-hover/btn:translate-x-1 group-hover/btn:-translate-y-1 transition-transform duration-300" />
+                      <motion.div 
+                        className="absolute inset-0 bg-gold translate-y-full group-hover/btn:translate-y-0 transition-transform duration-500"
+                      />
                     </motion.button>
                   </div>
                 </div>

@@ -8,7 +8,6 @@ const NAV = [
   { to: "/about", label: "About" },
   { to: "/services", label: "Services" },
   { to: "/gallery", label: "Gallery" },
-  { to: "/contact", label: "Journal" },
 ];
 
 const BRAND = "VARNANA EVENTS";
@@ -88,7 +87,7 @@ export function Navbar() {
             to="/contact"
             className="inline-flex items-center gap-2 rounded-full bg-burgundy px-6 py-3 text-[12px] uppercase tracking-[0.22em] text-ivory hover:bg-burgundy-deep transition-colors"
           >
-            Let's Begin
+            Plan Your Event
           </Link>
         </motion.div>
 
@@ -132,7 +131,7 @@ export function Navbar() {
                 onClick={() => setOpen(false)}
                 className="mt-4 rounded-full bg-burgundy px-8 py-3 text-[12px] uppercase tracking-[0.22em] text-ivory"
               >
-                Let's Begin
+                Plan Your Event
               </Link>
             </nav>
           </motion.div>
