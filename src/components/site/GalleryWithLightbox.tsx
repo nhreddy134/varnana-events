@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
+import { productionGalleryImages } from '@/data/galleryImages';
 
 interface GalleryImage {
   id: number;
@@ -35,57 +36,15 @@ export const GalleryWithLightbox = () => {
         // const response = await trpc.gallery.getPublished.query();
         // setImages(response);
 
-        // Mock data for now
-        const mockImages: GalleryImage[] = [
-          {
-            id: 1,
-            title: 'Elegant Wedding Reception',
-            description: 'A beautiful evening celebration with golden lights',
-            imageUrl: 'https://images.unsplash.com/photo-1519671482677-504be0ffec60?w=800&q=80',
-            eventType: 'Weddings',
-          },
-          {
-            id: 2,
-            title: 'Corporate Gala',
-            description: 'Professional networking event with premium ambiance',
-            imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
-            eventType: 'Corporate Events',
-          },
-          {
-            id: 3,
-            title: 'Birthday Celebration',
-            description: 'Colorful and vibrant birthday party setup',
-            imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
-            eventType: 'Birthdays',
-          },
-          {
-            id: 4,
-            title: 'Anniversary Dinner',
-            description: 'Romantic setup for a special milestone',
-            imageUrl: 'https://images.unsplash.com/photo-1519671482677-504be0ffec60?w=800&q=80',
-            eventType: 'Anniversaries',
-          },
-          {
-            id: 5,
-            title: 'Social Gathering',
-            description: 'Friends and family coming together',
-            imageUrl: 'https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=800&q=80',
-            eventType: 'Social Events',
-          },
-          {
-            id: 6,
-            title: 'Cultural Festival',
-            description: 'Traditional celebration with vibrant decorations',
-            imageUrl: 'https://images.unsplash.com/photo-1519671482677-504be0ffec60?w=800&q=80',
-            eventType: 'Cultural Events',
-          },
-        ];
-
-        setImages(mockImages);
-        setFilteredImages(mockImages);
+        // Use production gallery images
+        setImages(productionGalleryImages);
+        setFilteredImages(productionGalleryImages);
         setLoading(false);
       } catch (error) {
         console.error('Failed to fetch gallery:', error);
+        // Fallback to production images on error
+        setImages(productionGalleryImages);
+        setFilteredImages(productionGalleryImages);
         setLoading(false);
       }
     };
@@ -184,6 +143,9 @@ export const GalleryWithLightbox = () => {
                 alt={image.title}
                 className="w-full h-64 object-cover group-hover:scale-110 transition-transform duration-500"
                 loading="lazy"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1519671482677-504be0ffec60?w=800&q=80';
+                }}
               />
 
               {/* Overlay */}
@@ -248,6 +210,9 @@ export const GalleryWithLightbox = () => {
                 src={currentImage.imageUrl}
                 alt={currentImage.title}
                 className="w-full rounded-lg"
+                onError={(e) => {
+                  (e.target as HTMLImageElement).src = 'https://images.unsplash.com/photo-1519671482677-504be0ffec60?w=1200&q=80';
+                }}
               />
 
               {/* Image info */}
