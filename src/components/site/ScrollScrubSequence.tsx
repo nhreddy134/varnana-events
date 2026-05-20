@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, useMemo } from "react";
-import { motion, useScroll, useTransform } from "framer-motion";
+import { useEffect, useRef, useState } from "react";
+import { motion, useScroll, useTransform, useSpring } from "framer-motion";
 
 interface ScrollScrubSequenceProps {
   frameCount?: number;
@@ -9,10 +9,10 @@ interface ScrollScrubSequenceProps {
 }
 
 export default function ScrollScrubSequence({
-  frameCount = 109,
+  frameCount = 240,
   baseUrl = "/frames/ezgif-frame-",
   extension = ".jpg",
-  startFrame = 39,
+  startFrame = 1,
 }: ScrollScrubSequenceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -25,8 +25,15 @@ export default function ScrollScrubSequence({
     offset: ["start start", "end end"],
   });
 
-  // Map scroll progress to frame index
-  const frameIndex = useTransform(scrollYProgress, [0, 1], [0, frameCount - 1]);
+  // Add smoothing to the scroll progress
+  const smoothProgress = useSpring(scrollYProgress, {
+    stiffness: 100,
+    damping: 30,
+    restDelta: 0.001
+  });
+
+  // Map smooth progress to frame index
+  const frameIndex = useTransform(smoothProgress, [0, 1], [0, frameCount - 1]);
 
   // Preload images
   useEffect(() => {
@@ -59,7 +66,6 @@ export default function ScrollScrubSequence({
       const img = images[currentFrame];
 
       if (img && img.complete) {
-        // Handle object-fit: cover logic in canvas
         const canvasWidth = canvas.width;
         const canvasHeight = canvas.height;
         const imgWidth = img.width;
@@ -76,13 +82,9 @@ export default function ScrollScrubSequence({
       }
     };
 
-    // Initial render
     render();
-
-    // Subscribe to frameIndex changes
     const unsubscribe = frameIndex.on("change", render);
 
-    // Handle resize
     const handleResize = () => {
       if (canvasRef.current) {
         canvasRef.current.width = window.innerWidth;
@@ -101,35 +103,32 @@ export default function ScrollScrubSequence({
   }, [images, frameIndex]);
 
   return (
-    <div ref={containerRef} className="relative h-[500vh] bg-black">
+    <div ref={containerRef} className="relative h-[600vh] bg-black">
       <div className="sticky top-0 h-screen w-full overflow-hidden">
-        {/* Canvas for high-performance rendering */}
         <canvas
           ref={canvasRef}
           className="h-full w-full object-cover"
           style={{
-            filter: "brightness(0.9) contrast(1.1)",
+            filter: "brightness(0.85) contrast(1.05)",
           }}
         />
 
-        {/* Loading Overlay */}
         {!isLoaded && (
           <div className="absolute inset-0 flex items-center justify-center bg-black z-50">
             <div className="flex flex-col items-center gap-4">
               <div className="h-12 w-12 animate-spin rounded-full border-2 border-gold border-t-transparent" />
               <p className="font-serif text-ivory/60 uppercase tracking-[0.3em] text-[10px]">
-                Crafting the Story...
+                Composing the Vision...
               </p>
             </div>
           </div>
         )}
 
-        {/* Narrative Overlays */}
         <div className="absolute inset-0 pointer-events-none">
           <motion.div
             style={{
-              opacity: useTransform(scrollYProgress, [0, 0.1, 0.2], [0, 1, 0]),
-              y: useTransform(scrollYProgress, [0, 0.1, 0.2], [20, 0, -20]),
+              opacity: useTransform(smoothProgress, [0, 0.1, 0.2], [0, 1, 0]),
+              y: useTransform(smoothProgress, [0, 0.1, 0.2], [20, 0, -20]),
             }}
             className="absolute inset-0 flex items-center justify-center px-6"
           >
@@ -140,8 +139,8 @@ export default function ScrollScrubSequence({
 
           <motion.div
             style={{
-              opacity: useTransform(scrollYProgress, [0.4, 0.5, 0.6], [0, 1, 0]),
-              y: useTransform(scrollYProgress, [0.4, 0.5, 0.6], [20, 0, -20]),
+              opacity: useTransform(smoothProgress, [0.4, 0.5, 0.6], [0, 1, 0]),
+              y: useTransform(smoothProgress, [0.4, 0.5, 0.6], [20, 0, -20]),
             }}
             className="absolute inset-0 flex items-center justify-center px-6"
           >
@@ -152,8 +151,8 @@ export default function ScrollScrubSequence({
 
           <motion.div
             style={{
-              opacity: useTransform(scrollYProgress, [0.8, 0.9, 1], [0, 1, 0]),
-              y: useTransform(scrollYProgress, [0.8, 0.9, 1], [20, 0, -20]),
+              opacity: useTransform(smoothProgress, [0.8, 0.9, 1], [0, 1, 0]),
+              y: useTransform(smoothProgress, [0.8, 0.9, 1], [20, 0, -20]),
             }}
             className="absolute inset-0 flex items-center justify-center px-6"
           >
@@ -163,8 +162,7 @@ export default function ScrollScrubSequence({
           </motion.div>
         </div>
 
-        {/* Gradient Overlays for Depth */}
-        <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/40 pointer-events-none" />
+        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none" />
       </div>
     </div>
   );
