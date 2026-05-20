@@ -9,10 +9,10 @@ interface ScrollScrubSequenceProps {
 }
 
 export default function ScrollScrubSequence({
-  frameCount = 120,
-  baseUrl = "https://raw.githubusercontent.com/nhreddy134/varnana-assets/main/frames/frame_",
+  frameCount = 109,
+  baseUrl = "/frames/ezgif-frame-",
   extension = ".jpg",
-  startFrame = 1,
+  startFrame = 39,
 }: ScrollScrubSequenceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -35,7 +35,7 @@ export default function ScrollScrubSequence({
 
     for (let i = 0; i < frameCount; i++) {
       const img = new Image();
-      const frameNum = (startFrame + i).toString().padStart(4, "0");
+      const frameNum = (startFrame + i).toString().padStart(3, "0");
       img.src = `${baseUrl}${frameNum}${extension}`;
       img.onload = () => {
         loadedCount++;
