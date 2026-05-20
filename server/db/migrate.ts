@@ -6,8 +6,10 @@ import { fileURLToPath } from 'url';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+import { initializeDatabase } from './connection';
+
 export async function runMigrations() {
-  const db = await getDatabase();
+  const db = await initializeDatabase();
   if (!db) {
     console.error('Failed to get database connection for migrations');
     return;
