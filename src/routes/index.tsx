@@ -8,7 +8,9 @@ import { ClientOnly } from "@/components/site/ClientOnly";
 import { HeroOrbs } from "@/components/site/HeroOrbs";
 import { GalleryCarousel } from "@/components/site/GalleryCarousel";
 import { StoryUnfoldsResponsive } from "@/components/site/StoryUnfoldsResponsive";
+import { StoryUnfolds3D } from "@/components/site/StoryUnfolds3D";
 import { HorizontalMarquee, TextReveal, ScaleOnScroll } from "@/components/site/ScrollEffects";
+import { ServicesEnhanced } from "@/components/site/ServicesEnhanced";
 
 const HeroParticles = lazy(() => import("@/components/three/HeroParticles").then(m => ({ default: m.HeroParticles })));
 const OrbitalRings = lazy(() => import("@/components/three/OrbitalRings").then(m => ({ default: m.OrbitalRings })));
@@ -60,9 +62,11 @@ function HomePage() {
   return (
     <>
       <Hero />
-      <StoryUnfoldsResponsive />
+      <StoryUnfolds3D />
+      {/* <StoryUnfoldsResponsive /> */}
       <CategoriesStrip />
-      <FeaturedServices />
+      <ServicesEnhanced />
+      {/* <FeaturedServices /> */}
       <GalleryPreview />
       <HorizontalMarquee />
       <WhyVarnana />
