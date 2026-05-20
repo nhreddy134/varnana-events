@@ -10,6 +10,7 @@ import { StoryUnfolds3D } from "@/components/site/StoryUnfolds3D";
 import { GalleryWithLightbox } from "@/components/site/GalleryWithLightbox";
 import { HorizontalMarquee } from "@/components/site/ScrollEffects";
 import { ServicesEnhanced } from "@/components/site/ServicesEnhanced";
+import TestimonialsCarousel from "@/components/site/TestimonialsCarousel";
 import { trpc } from '@/lib/trpc';
 
 const HeroParticles = lazy(() => import("@/components/three/HeroParticles").then(m => ({ default: m.HeroParticles })));
@@ -115,7 +116,7 @@ function HomePage() {
       <HorizontalMarquee />
       <WhyVarnana />
       <ProcessTimeline />
-      <Testimonials />
+      <TestimonialsCarousel />
       <FinalCTA />
     </>
   );
@@ -321,97 +322,7 @@ function ProcessTimeline() {
     </section>
   );
 }
-const TESTIMONIALS = [
-  {
-    name: "Ananya & Vikram",
-    role: "Wedding",
-    content: "Varnana didn't just plan our wedding; they choreographed a dream. Every detail felt like it was plucked from our own hearts.",
-    image: "https://images.unsplash.com/photo-1511795409834-ef04bbd61622?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    name: "TechNova Solutions",
-    role: "Corporate Gala",
-    content: "The atmosphere was electric. They managed to make a corporate event feel intimate, sophisticated, and entirely unique.",
-    image: "https://images.unsplash.com/photo-1511578314322-379afb476865?auto=format&fit=crop&q=80&w=400",
-  },
-  {
-    name: "The Kapoor Family",
-    role: "Golden Anniversary",
-    content: "A masterclass in elegance. They honored our traditions while bringing a fresh, editorial perspective that wowed everyone.",
-    image: "https://images.unsplash.com/photo-1464366400600-7168b8af9bc3?auto=format&fit=crop&q=80&w=400",
-  },
-];
 
-function Testimonials() {
-  const [active, setActive] = useState(0);
-
-  return (
-    <section className="py-32 bg-ivory overflow-hidden">
-      <div className="container-prose">
-        <div className="text-center mb-20">
-          <p className="text-[11px] uppercase tracking-[0.4em] text-gold mb-4">Voices of Varnana</p>
-          <h2 className="font-display text-4xl md:text-5xl text-burgundy">Kind Words</h2>
-        </div>
-
-        <div className="relative h-[500px] flex items-center justify-center">
-          <AnimatePresence mode="wait">
-            {TESTIMONIALS.map((t, i) => (
-              i === active && (
-                <motion.div
-                  key={i}
-                  initial={{ opacity: 0, rotateY: 45, z: -100, x: 100 }}
-                  animate={{ opacity: 1, rotateY: 0, z: 0, x: 0 }}
-                  exit={{ opacity: 0, rotateY: -45, z: -100, x: -100 }}
-                  transition={{ type: "spring", stiffness: 50, damping: 20 }}
-                  className="absolute inset-0 flex flex-col items-center justify-center text-center px-6"
-                  style={{ perspective: "1000px" }}
-                >
-                  <div className="relative mb-10">
-                    <motion.div 
-                      initial={{ scale: 0.8 }}
-                      animate={{ scale: 1 }}
-                      className="w-24 h-24 rounded-full overflow-hidden border-2 border-gold p-1"
-                    >
-                      <img src={t.image} alt={t.name} className="w-full h-full object-cover rounded-full" />
-                    </motion.div>
-                    <span className="absolute -bottom-2 -right-2 bg-burgundy text-ivory w-8 h-8 rounded-full flex items-center justify-center text-xl">“</span>
-                  </div>
-                  
-                  <p className="font-display text-2xl md:text-3xl text-ink/90 leading-relaxed max-w-2xl mb-8 italic">
-                    {t.content}
-                  </p>
-                  
-                  <div>
-                    <h4 className="text-burgundy font-semibold tracking-widest uppercase text-sm">{t.name}</h4>
-                    <p className="text-gold text-[10px] uppercase tracking-[0.3em] mt-1">{t.role}</p>
-                  </div>
-                </motion.div>
-              )
-            ))}
-          </AnimatePresence>
-
-          <div className="absolute bottom-0 left-1/2 -translate-x-1/2 flex gap-4 z-20">
-            {TESTIMONIALS.map((_, i) => (
-              <button
-                key={i}
-                onClick={() => setActive(i)}
-                className={`w-12 h-1 bg-burgundy/10 overflow-hidden relative transition-all duration-500 ${i === active ? 'w-20' : ''}`}
-              >
-                {i === active && (
-                  <motion.div
-                    layoutId="active-bar"
-                    className="absolute inset-0 bg-gold"
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-        </div>
-      </div>
-    </section>
-  );
-}
 function FinalCTA() {
   return (
     <section className="py-28 bg-burgundy-deep text-ivory overflow-hidden relative">
