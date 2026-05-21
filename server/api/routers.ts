@@ -3,11 +3,24 @@ import { router, publicProcedure, protectedProcedure, adminProcedure } from './t
 import { galleryImages, inquiries, announcements, contactInfo, users } from '../db/schema';
 import { eq, desc, and } from 'drizzle-orm';
 import { generateToken, hashPassword, comparePassword } from '../middleware/auth';
+import { TRPCError } from '@trpc/server';
+
+// Helper to ensure DB is available
+const ensureDb = (db: any) => {
+  if (!db) {
+    throw new TRPCError({
+      code: 'INTERNAL_SERVER_ERROR',
+      message: 'Database connection not established',
+    });
+  }
+  return db;
+};
 
 // ============= GALLERY ROUTES =============
 const galleryRouter = router({
   getPublished: publicProcedure.query(async ({ ctx }) => {
-    const images = await ctx.db
+    const db = ensureDb(ctx.db);
+    const images = await db
       .select()
       .from(galleryImages)
       .where(eq(galleryImages.isPublished, true))
@@ -16,7 +29,8 @@ const galleryRouter = router({
   }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const images = await ctx.db
+    const db = ensureDb(ctx.db);
+    const images = await db
       .select()
       .from(galleryImages)
       .orderBy(galleryImages.displayOrder);
@@ -35,7 +49,8 @@ const galleryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const [result] = await ctx.db.insert(galleryImages).values(input);
+      const db = ensureDb(ctx.db);
+      const [result] = await db.insert(galleryImages).values(input);
       return result;
     }),
 
@@ -51,15 +66,17 @@ const galleryRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const db = ensureDb(ctx.db);
       const { id, ...updateData } = input;
-      await ctx.db.update(galleryImages).set(updateData).where(eq(galleryImages.id, id));
+      await db.update(galleryImages).set(updateData).where(eq(galleryImages.id, id));
       return { success: true };
     }),
 
   delete: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(galleryImages).where(eq(galleryImages.id, input.id));
+      const db = ensureDb(ctx.db);
+      await db.delete(galleryImages).where(eq(galleryImages.id, input.id));
       return { success: true };
     }),
 });
@@ -80,16 +97,17 @@ const inquiriesRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const [result] = await ctx.db.insert(inquiries).values({
+      const db = ensureDb(ctx.db);
+      const [result] = await db.insert(inquiries).values({
         ...input,
         status: 'new',
       });
-      // TODO: Send email notification to admin
       return result;
     }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const allInquiries = await ctx.db
+    const db = ensureDb(ctx.db);
+    const allInquiries = await db
       .select()
       .from(inquiries)
       .orderBy(desc(inquiries.createdAt));
@@ -104,7 +122,8 @@ const inquiriesRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.update(inquiries).set({ status: input.status }).where(eq(inquiries.id, input.id));
+      const db = ensureDb(ctx.db);
+      await db.update(inquiries).set({ status: input.status }).where(eq(inquiries.id, input.id));
       return { success: true };
     }),
 });
@@ -112,7 +131,8 @@ const inquiriesRouter = router({
 // ============= ANNOUNCEMENTS ROUTES =============
 const announcementsRouter = router({
   getPublished: publicProcedure.query(async ({ ctx }) => {
-    const announcements_data = await ctx.db
+    const db = ensureDb(ctx.db);
+    const announcements_data = await db
       .select()
       .from(announcements)
       .where(eq(announcements.isPublished, true))
@@ -121,7 +141,8 @@ const announcementsRouter = router({
   }),
 
   getAll: adminProcedure.query(async ({ ctx }) => {
-    const announcements_data = await ctx.db
+    const db = ensureDb(ctx.db);
+    const announcements_data = await db
       .select()
       .from(announcements)
       .orderBy(desc(announcements.createdAt));
@@ -138,7 +159,8 @@ const announcementsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const [result] = await ctx.db.insert(announcements).values(input);
+      const db = ensureDb(ctx.db);
+      const [result] = await db.insert(announcements).values(input);
       return result;
     }),
 
@@ -153,15 +175,17 @@ const announcementsRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
+      const db = ensureDb(ctx.db);
       const { id, ...updateData } = input;
-      await ctx.db.update(announcements).set(updateData).where(eq(announcements.id, id));
+      await db.update(announcements).set(updateData).where(eq(announcements.id, id));
       return { success: true };
     }),
 
   delete: adminProcedure
     .input(z.object({ id: z.number() }))
     .mutation(async ({ ctx, input }) => {
-      await ctx.db.delete(announcements).where(eq(announcements.id, input.id));
+      const db = ensureDb(ctx.db);
+      await db.delete(announcements).where(eq(announcements.id, input.id));
       return { success: true };
     }),
 });
@@ -169,7 +193,8 @@ const announcementsRouter = router({
 // ============= CONTACT INFO ROUTES =============
 const contactRouter = router({
   get: publicProcedure.query(async ({ ctx }) => {
-    const contact = await ctx.db.select().from(contactInfo).limit(1);
+    const db = ensureDb(ctx.db);
+    const contact = await db.select().from(contactInfo).limit(1);
     return contact[0] || null;
   }),
 
@@ -184,11 +209,12 @@ const contactRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const existing = await ctx.db.select().from(contactInfo).limit(1);
+      const db = ensureDb(ctx.db);
+      const existing = await db.select().from(contactInfo).limit(1);
       if (existing.length > 0) {
-        await ctx.db.update(contactInfo).set(input).where(eq(contactInfo.id, existing[0].id));
+        await db.update(contactInfo).set(input).where(eq(contactInfo.id, existing[0].id));
       } else {
-        await ctx.db.insert(contactInfo).values({
+        await db.insert(contactInfo).values({
           businessName: input.businessName || 'Varnana Events',
           ...input,
         });
@@ -208,13 +234,14 @@ const authRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const existing = await ctx.db.select().from(users).where(eq(users.email, input.email));
+      const db = ensureDb(ctx.db);
+      const existing = await db.select().from(users).where(eq(users.email, input.email));
       if (existing.length > 0) {
         throw new Error('Email already registered');
       }
 
       const passwordHash = await hashPassword(input.password);
-      const [result] = await ctx.db.insert(users).values({
+      const [result] = await db.insert(users).values({
         email: input.email,
         passwordHash,
         name: input.name,
@@ -238,7 +265,8 @@ const authRouter = router({
       })
     )
     .mutation(async ({ ctx, input }) => {
-      const user = await ctx.db.select().from(users).where(eq(users.email, input.email));
+      const db = ensureDb(ctx.db);
+      const user = await db.select().from(users).where(eq(users.email, input.email));
       if (user.length === 0) {
         throw new Error('Invalid credentials');
       }
@@ -259,7 +287,8 @@ const authRouter = router({
 
   me: protectedProcedure.query(async ({ ctx }) => {
     if (!ctx.user) return null;
-    const user = await ctx.db.select().from(users).where(eq(users.id, ctx.user.id));
+    const db = ensureDb(ctx.db);
+    const user = await db.select().from(users).where(eq(users.id, ctx.user.id));
     return user[0] || null;
   }),
 });

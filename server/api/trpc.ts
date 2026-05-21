@@ -5,7 +5,9 @@ import { verifyToken } from '../middleware/auth';
 
 export const createContext = async ({ req, res }: CreateExpressContextOptions) => {
   const db = await initializeDatabase();
-  const token = req.headers.authorization?.replace('Bearer ', '');
+  // Fix: Use req.headers['authorization'] for Express request headers
+  const authHeader = req.headers.authorization;
+  const token = typeof authHeader === 'string' ? authHeader.replace('Bearer ', '') : undefined;
   
   let user: { id: number; email: string; role: string } | null = null;
   
