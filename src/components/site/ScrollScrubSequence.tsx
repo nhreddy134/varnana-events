@@ -126,8 +126,8 @@ export default function ScrollScrubSequence({
 
         {/* Narrative Overlays with Improved Visibility */}
         <div className="absolute inset-0 pointer-events-none z-10">
-          {/* Top & Bottom Vignette for text readability */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
+          {/* Top & Bottom Vignette for text readability - Enhanced */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/70" />
 
           <motion.div
             style={{
@@ -137,11 +137,17 @@ export default function ScrollScrubSequence({
             className="absolute inset-0 flex items-center justify-center px-6"
           >
             <div className="text-center">
-              <h2 className="font-serif text-4xl md:text-7xl text-white italic leading-tight drop-shadow-2xl">
+              <h2 className="font-serif text-5xl md:text-8xl text-white italic leading-tight" style={{
+                textShadow: '0 4px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)',
+                WebkitTextStroke: '0.5px rgba(255,255,255,0.3)',
+              }}>
                 Every event is a <br /> 
-                <span className="text-gold drop-shadow-[0_2px_10px_rgba(196,168,130,0.4)]">living story.</span>
+                <span className="text-gold" style={{
+                  textShadow: '0 4px 20px rgba(196,168,130,0.5), 0 2px 10px rgba(0,0,0,0.6)',
+                  WebkitTextStroke: '0.5px rgba(196,168,130,0.2)',
+                }}>living story.</span>
               </h2>
-              <div className="mt-6 h-px w-24 bg-gold/50 mx-auto" />
+              <div className="mt-6 h-px w-32 bg-gold mx-auto" />
             </div>
           </motion.div>
 
@@ -153,11 +159,17 @@ export default function ScrollScrubSequence({
             className="absolute inset-0 flex items-center justify-center px-6"
           >
             <div className="text-center">
-              <h2 className="font-serif text-4xl md:text-7xl text-white italic leading-tight drop-shadow-2xl">
+              <h2 className="font-serif text-5xl md:text-8xl text-white italic leading-tight" style={{
+                textShadow: '0 4px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)',
+                WebkitTextStroke: '0.5px rgba(255,255,255,0.3)',
+              }}>
                 Composed with <br /> 
-                <span className="text-gold drop-shadow-[0_2px_10px_rgba(196,168,130,0.4)]">quiet intention.</span>
+                <span className="text-gold" style={{
+                  textShadow: '0 4px 20px rgba(196,168,130,0.5), 0 2px 10px rgba(0,0,0,0.6)',
+                  WebkitTextStroke: '0.5px rgba(196,168,130,0.2)',
+                }}>quiet intention.</span>
               </h2>
-              <div className="mt-6 h-px w-24 bg-gold/50 mx-auto" />
+              <div className="mt-6 h-px w-32 bg-gold mx-auto" />
             </div>
           </motion.div>
 
@@ -169,11 +181,17 @@ export default function ScrollScrubSequence({
             className="absolute inset-0 flex items-center justify-center px-6"
           >
             <div className="text-center">
-              <h2 className="font-serif text-4xl md:text-7xl text-white italic leading-tight drop-shadow-2xl">
+              <h2 className="font-serif text-5xl md:text-8xl text-white italic leading-tight" style={{
+                textShadow: '0 4px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)',
+                WebkitTextStroke: '0.5px rgba(255,255,255,0.3)',
+              }}>
                 And details only <br /> 
-                <span className="text-gold drop-shadow-[0_2px_10px_rgba(196,168,130,0.4)]">you remember.</span>
+                <span className="text-gold" style={{
+                  textShadow: '0 4px 20px rgba(196,168,130,0.5), 0 2px 10px rgba(0,0,0,0.6)',
+                  WebkitTextStroke: '0.5px rgba(196,168,130,0.2)',
+                }}>you remember.</span>
               </h2>
-              <div className="mt-6 h-px w-24 bg-gold/50 mx-auto" />
+              <div className="mt-6 h-px w-32 bg-gold mx-auto" />
             </div>
           </motion.div>
         </div>

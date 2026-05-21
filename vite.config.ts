@@ -9,7 +9,7 @@ export default defineConfig({
   },
   vite: {
     server: {
-      allowedHosts: ["5173-iwlbw8gex2nrb63e3va4n-51d09b81.sg1.manus.computer"],
+      allowedHosts: true,
     },
   },
 });
