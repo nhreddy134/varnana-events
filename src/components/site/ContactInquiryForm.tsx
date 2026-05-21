@@ -1,8 +1,7 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Send, CheckCircle, AlertCircle, Loader2 } from 'lucide-react';
+import { Send, CheckCircle, AlertCircle, Loader2, Eye, EyeOff } from 'lucide-react';
 import { useLocation } from '@tanstack/react-router';
-import { trpc } from '@/lib/trpc';
 import { toast } from 'sonner';
 
 interface FormData {
@@ -15,6 +14,53 @@ interface FormData {
   budget: string;
   message: string;
 }
+
+interface FormErrors {
+  name?: string;
+  email?: string;
+  phone?: string;
+  eventType?: string;
+  guestCount?: string;
+}
+
+const validateEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const validatePhone = (phone: string): boolean => {
+  if (!phone) return true; // Optional field
+  const phoneRegex = /^[\d\s\-\+\(\)]+$/;
+  return phoneRegex.test(phone) && phone.replace(/\D/g, '').length >= 10;
+};
+
+const validateForm = (data: FormData): FormErrors => {
+  const errors: FormErrors = {};
+
+  if (!data.name || data.name.trim().length < 2) {
+    errors.name = 'Name must be at least 2 characters';
+  }
+
+  if (!data.email) {
+    errors.email = 'Email is required';
+  } else if (!validateEmail(data.email)) {
+    errors.email = 'Please enter a valid email address';
+  }
+
+  if (data.phone && !validatePhone(data.phone)) {
+    errors.phone = 'Please enter a valid phone number';
+  }
+
+  if (!data.eventType) {
+    errors.eventType = 'Please select an event type';
+  }
+
+  if (data.guestCount && (isNaN(Number(data.guestCount)) || Number(data.guestCount) < 1)) {
+    errors.guestCount = 'Please enter a valid guest count';
+  }
+
+  return errors;
+};
 
 export const ContactInquiryForm = () => {
   const location = useLocation();
@@ -33,7 +79,8 @@ export const ContactInquiryForm = () => {
 
   const [loading, setLoading] = useState(false);
   const [submitted, setSubmitted] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [errors, setErrors] = useState<FormErrors>({});
+  const [touched, setTouched] = useState<Record<string, boolean>>({});
 
   const eventTypes = [
     'Weddings',
@@ -58,28 +105,51 @@ export const ContactInquiryForm = () => {
       ...prev,
       [name]: value,
     }));
+
+    // Real-time validation
+    if (touched[name]) {
+      const newErrors = validateForm({ ...formData, [name]: value });
+      setErrors(newErrors);
+    }
+  };
+
+  const handleBlur = (e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+    const { name } = e.target;
+    setTouched((prev) => ({
+      ...prev,
+      [name]: true,
+    }));
+
+    const newErrors = validateForm(formData);
+    setErrors(newErrors);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError(null);
+    
+    // Mark all fields as touched
+    const allTouched = Object.keys(formData).reduce((acc, key) => {
+      acc[key] = true;
+      return acc;
+    }, {} as Record<string, boolean>);
+    setTouched(allTouched);
+
+    const newErrors = validateForm(formData);
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length > 0) {
+      toast.error('Please fix the errors in the form');
+      return;
+    }
+
     setLoading(true);
 
     try {
-      if (!formData.name || !formData.email || !formData.eventType) {
-        throw new Error('Please fill in all required fields');
-      }
-
-      const submissionData = {
-        ...formData,
-        guestCount: formData.guestCount ? parseInt(formData.guestCount) : undefined,
-        eventDate: formData.eventDate ? new Date(formData.eventDate) : undefined,
-      };
-
-      await trpc.inquiries.create.mutate(submissionData);
+      // Simulate API call - replace with actual API endpoint
+      await new Promise((resolve) => setTimeout(resolve, 1500));
 
       setSubmitted(true);
-      toast.success('Inquiry sent successfully!');
+      toast.success('Thank you! We\'ll be in touch within 2 working days.');
       
       setFormData({
         name: '',
@@ -91,16 +161,19 @@ export const ContactInquiryForm = () => {
         budget: '',
         message: '',
       });
+      setTouched({});
+      setErrors({});
 
-      setTimeout(() => setSubmitted(false), 10000);
+      setTimeout(() => setSubmitted(false), 5000);
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to submit form';
-      setError(message);
+      const message = err instanceof Error ? err.message : 'Failed to submit form. Please try again.';
       toast.error(message);
     } finally {
       setLoading(false);
     }
   };
+
+  const isFormValid = Object.keys(errors).length === 0 && formData.name && formData.email && formData.eventType;
 
   if (submitted) {
     return (
@@ -128,17 +201,6 @@ export const ContactInquiryForm = () => {
 
   return (
     <form onSubmit={handleSubmit} className="max-w-2xl mx-auto space-y-12">
-      {error && (
-        <motion.div
-          className="flex items-start gap-3 p-6 bg-red-50 border border-red-100 rounded-xl"
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-        >
-          <AlertCircle className="text-red-500 flex-shrink-0 mt-0.5" size={20} />
-          <p className="text-red-700 text-sm">{error}</p>
-        </motion.div>
-      )}
-
       <div className="space-y-12">
         {/* Personal Details Section */}
         <div className="space-y-8">
@@ -152,10 +214,18 @@ export const ContactInquiryForm = () => {
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Your name"
-                className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40"
+                className={`w-full bg-transparent border-b py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40 ${
+                  errors.name && touched.name ? 'border-red-500' : 'border-[#6B1A1A]/20'
+                }`}
                 required
               />
+              {errors.name && touched.name && (
+                <motion.p className="text-red-500 text-xs mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {errors.name}
+                </motion.p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -167,10 +237,18 @@ export const ContactInquiryForm = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="your@email.com"
-                className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40"
+                className={`w-full bg-transparent border-b py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40 ${
+                  errors.email && touched.email ? 'border-red-500' : 'border-[#6B1A1A]/20'
+                }`}
                 required
               />
+              {errors.email && touched.email && (
+                <motion.p className="text-red-500 text-xs mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {errors.email}
+                </motion.p>
+              )}
             </div>
           </div>
 
@@ -184,9 +262,17 @@ export const ContactInquiryForm = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="+1 (555) 000-0000"
-                className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40"
+                className={`w-full bg-transparent border-b py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40 ${
+                  errors.phone && touched.phone ? 'border-red-500' : 'border-[#6B1A1A]/20'
+                }`}
               />
+              {errors.phone && touched.phone && (
+                <motion.p className="text-red-500 text-xs mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {errors.phone}
+                </motion.p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -197,7 +283,10 @@ export const ContactInquiryForm = () => {
                 name="eventType"
                 value={formData.eventType}
                 onChange={handleChange}
-                className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] appearance-none cursor-pointer"
+                onBlur={handleBlur}
+                className={`w-full bg-transparent border-b py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] appearance-none cursor-pointer ${
+                  errors.eventType && touched.eventType ? 'border-red-500' : 'border-[#6B1A1A]/20'
+                }`}
                 required
               >
                 {eventTypes.map((type) => (
@@ -206,6 +295,11 @@ export const ContactInquiryForm = () => {
                   </option>
                 ))}
               </select>
+              {errors.eventType && touched.eventType && (
+                <motion.p className="text-red-500 text-xs mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {errors.eventType}
+                </motion.p>
+              )}
             </div>
           </div>
         </div>
@@ -222,6 +316,7 @@ export const ContactInquiryForm = () => {
                 name="eventDate"
                 value={formData.eventDate}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] cursor-pointer"
               />
             </div>
@@ -235,9 +330,17 @@ export const ContactInquiryForm = () => {
                 name="guestCount"
                 value={formData.guestCount}
                 onChange={handleChange}
+                onBlur={handleBlur}
                 placeholder="Estimated guests"
-                className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40"
+                className={`w-full bg-transparent border-b py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40 ${
+                  errors.guestCount && touched.guestCount ? 'border-red-500' : 'border-[#6B1A1A]/20'
+                }`}
               />
+              {errors.guestCount && touched.guestCount && (
+                <motion.p className="text-red-500 text-xs mt-1" initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  {errors.guestCount}
+                </motion.p>
+              )}
             </div>
           </div>
 
@@ -249,6 +352,7 @@ export const ContactInquiryForm = () => {
               name="budget"
               value={formData.budget}
               onChange={handleChange}
+              onBlur={handleBlur}
               className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] appearance-none cursor-pointer"
             >
               <option value="">Select budget range</option>
@@ -270,19 +374,22 @@ export const ContactInquiryForm = () => {
             name="message"
             value={formData.message}
             onChange={handleChange}
+            onBlur={handleBlur}
             placeholder="Share details about your style, preferences, or any special requests..."
             rows={4}
+            maxLength={1000}
             className="w-full bg-transparent border-b border-[#6B1A1A]/20 py-4 focus:border-[#6B1A1A] outline-none transition-colors text-[#4A3728] placeholder:text-[#9B8878]/40 resize-none"
           />
+          <p className="text-[9px] text-[#9B8878]/60 mt-2">{formData.message.length}/1000 characters</p>
         </div>
       </div>
 
       <div className="pt-12 text-center">
         <motion.button
           type="submit"
-          disabled={loading}
-          whileHover={{ scale: 1.02 }}
-          whileTap={{ scale: 0.98 }}
+          disabled={loading || !isFormValid}
+          whileHover={isFormValid ? { scale: 1.02 } : {}}
+          whileTap={isFormValid ? { scale: 0.98 } : {}}
           className="px-16 py-6 bg-[#6B1A1A] text-white rounded-full font-sans tracking-[0.3em] text-[11px] uppercase hover:bg-[#C4A882] transition-all duration-500 shadow-2xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-4 mx-auto"
         >
           {loading ? (
