@@ -4,7 +4,7 @@ import { useRef, ReactNode } from "react";
 /**
  * ScrollEffects - Global scroll effects for the page
  * - Parallax backgrounds
- * - Horizontal marquee
+ * - Horizontal marquee (Continuous Loop)
  * - Text reveal on scroll
  * - Progress indicator
  */
@@ -32,38 +32,53 @@ export function ParallaxSection({
   );
 }
 
-/* ============ HORIZONTAL MARQUEE ============ */
+/* ============ HORIZONTAL MARQUEE (CONTINUOUS LOOP) ============ */
 export function HorizontalMarquee() {
-  const containerRef = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({
-    target: containerRef,
-    offset: ["start center", "end center"],
-  });
-
-  // Map scroll to horizontal position
-  const x = useTransform(scrollYProgress, [0, 1], [0, -500]);
-
   const text =
     "Weddings · Birthdays · Corporate · Baby Showers · Custom Celebrations · Editorial Events · Destination Events · ";
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full bg-ivory py-16 md:py-20 overflow-hidden"
-    >
-      <motion.div
-        className="flex whitespace-nowrap"
-        style={{ x }}
-      >
-        {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="font-display text-4xl md:text-5xl italic text-burgundy flex-shrink-0 px-8"
-          >
-            {text}
-          </div>
-        ))}
-      </motion.div>
+    <div className="relative w-full bg-[#F0EDE8] py-16 md:py-24 overflow-hidden border-y border-[#6B1A1A]/5">
+      <div className="flex whitespace-nowrap">
+        <motion.div
+          className="flex"
+          animate={{ x: [0, -1000] }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="font-serif text-4xl md:text-6xl italic text-[#6B1A1A] flex-shrink-0 px-12 opacity-80"
+            >
+              {text}
+            </div>
+          ))}
+        </motion.div>
+        
+        {/* Duplicate for seamless loop */}
+        <motion.div
+          className="flex"
+          animate={{ x: [0, -1000] }}
+          transition={{
+            duration: 30,
+            repeat: Infinity,
+            ease: "linear",
+          }}
+        >
+          {[...Array(6)].map((_, i) => (
+            <div
+              key={i}
+              className="font-serif text-4xl md:text-6xl italic text-[#6B1A1A] flex-shrink-0 px-12 opacity-80"
+            >
+              {text}
+            </div>
+          ))}
+        </motion.div>
+      </div>
     </div>
   );
 }
@@ -153,7 +168,7 @@ export function ProgressIndicator() {
 
   return (
     <motion.div
-      className="fixed right-0 top-0 w-1 h-full bg-gradient-to-b from-burgundy via-gold to-burgundy z-50 pointer-events-none"
+      className="fixed right-0 top-0 w-1 h-full bg-gradient-to-b from-[#6B1A1A] via-[#C4A882] to-[#6B1A1A] z-50 pointer-events-none"
       style={{
         scaleY: scrollYProgress,
         transformOrigin: "top",
@@ -161,7 +176,7 @@ export function ProgressIndicator() {
     >
       {/* Gold dot that travels along the line */}
       <motion.div
-        className="absolute right-0 w-3 h-3 rounded-full bg-gold shadow-lg"
+        className="absolute right-0 w-3 h-3 rounded-full bg-[#C4A882] shadow-lg"
         style={{
           top: useTransform(scrollYProgress, [0, 1], ["0%", "100%"]),
           transform: "translateX(50%)",

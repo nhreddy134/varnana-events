@@ -12,6 +12,7 @@ export function Footer() {
           <Link to="/services" className="hover:text-gold transition">Services</Link>
           <Link to="/gallery" className="hover:text-gold transition">Gallery</Link>
           <Link to="/contact" className="hover:text-gold transition">Contact</Link>
+          <Link to="/admin/login" className="opacity-0 hover:opacity-100 transition-opacity duration-500 text-[8px]">Admin</Link>
         </nav>
         <div className="flex items-center gap-5 text-gold">
           <a href="#" aria-label="Instagram" className="hover:text-gold-light transition"><Instagram size={20} /></a>

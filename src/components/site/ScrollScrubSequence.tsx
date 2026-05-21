@@ -109,7 +109,7 @@ export default function ScrollScrubSequence({
           ref={canvasRef}
           className="h-full w-full object-cover"
           style={{
-            filter: "brightness(0.85) contrast(1.05)",
+            filter: "brightness(0.75) contrast(1.1)", // Darkened slightly for better text contrast
           }}
         />
 
@@ -124,45 +124,59 @@ export default function ScrollScrubSequence({
           </div>
         )}
 
-        <div className="absolute inset-0 pointer-events-none">
+        {/* Narrative Overlays with Improved Visibility */}
+        <div className="absolute inset-0 pointer-events-none z-10">
+          {/* Top & Bottom Vignette for text readability */}
+          <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-transparent to-black/60" />
+
           <motion.div
             style={{
               opacity: useTransform(smoothProgress, [0, 0.1, 0.2], [0, 1, 0]),
-              y: useTransform(smoothProgress, [0, 0.1, 0.2], [20, 0, -20]),
+              y: useTransform(smoothProgress, [0, 0.1, 0.2], [40, 0, -40]),
             }}
             className="absolute inset-0 flex items-center justify-center px-6"
           >
-            <h2 className="font-serif text-4xl md:text-6xl text-white text-center italic leading-tight">
-              Every event is a <br /> <span className="text-gold">living story.</span>
-            </h2>
+            <div className="text-center">
+              <h2 className="font-serif text-4xl md:text-7xl text-white italic leading-tight drop-shadow-2xl">
+                Every event is a <br /> 
+                <span className="text-gold drop-shadow-[0_2px_10px_rgba(196,168,130,0.4)]">living story.</span>
+              </h2>
+              <div className="mt-6 h-px w-24 bg-gold/50 mx-auto" />
+            </div>
           </motion.div>
 
           <motion.div
             style={{
               opacity: useTransform(smoothProgress, [0.4, 0.5, 0.6], [0, 1, 0]),
-              y: useTransform(smoothProgress, [0.4, 0.5, 0.6], [20, 0, -20]),
+              y: useTransform(smoothProgress, [0.4, 0.5, 0.6], [40, 0, -40]),
             }}
             className="absolute inset-0 flex items-center justify-center px-6"
           >
-            <h2 className="font-serif text-4xl md:text-6xl text-white text-center italic leading-tight">
-              Composed with <br /> <span className="text-gold">quiet intention.</span>
-            </h2>
+            <div className="text-center">
+              <h2 className="font-serif text-4xl md:text-7xl text-white italic leading-tight drop-shadow-2xl">
+                Composed with <br /> 
+                <span className="text-gold drop-shadow-[0_2px_10px_rgba(196,168,130,0.4)]">quiet intention.</span>
+              </h2>
+              <div className="mt-6 h-px w-24 bg-gold/50 mx-auto" />
+            </div>
           </motion.div>
 
           <motion.div
             style={{
               opacity: useTransform(smoothProgress, [0.8, 0.9, 1], [0, 1, 0]),
-              y: useTransform(smoothProgress, [0.8, 0.9, 1], [20, 0, -20]),
+              y: useTransform(smoothProgress, [0.8, 0.9, 1], [40, 0, -40]),
             }}
             className="absolute inset-0 flex items-center justify-center px-6"
           >
-            <h2 className="font-serif text-4xl md:text-6xl text-white text-center italic leading-tight">
-              And details only <br /> <span className="text-gold">you remember.</span>
-            </h2>
+            <div className="text-center">
+              <h2 className="font-serif text-4xl md:text-7xl text-white italic leading-tight drop-shadow-2xl">
+                And details only <br /> 
+                <span className="text-gold drop-shadow-[0_2px_10px_rgba(196,168,130,0.4)]">you remember.</span>
+              </h2>
+              <div className="mt-6 h-px w-24 bg-gold/50 mx-auto" />
+            </div>
           </motion.div>
         </div>
-
-        <div className="absolute inset-0 bg-gradient-to-b from-black/50 via-transparent to-black/50 pointer-events-none" />
       </div>
     </div>
   );

@@ -14,7 +14,8 @@
     "format": "prettier --write .",
     "db:generate": "drizzle-kit generate",
     "db:migrate": "tsx server/db/migrate.ts",
-    "db:test": "tsx server/db/test.ts"
+    "db:test": "tsx server/db/test.ts",
+    "db:seed": "tsx server/db/seed.ts"
   },
   "dependencies": {
     "@cloudflare/vite-plugin": "^1.25.5",
