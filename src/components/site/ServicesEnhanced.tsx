@@ -59,7 +59,11 @@ export const ServicesEnhanced = () => {
   const navigate = useNavigate();
 
   const handleLearnMore = (serviceId: string) => {
-    navigate({ to: `/services/${serviceId}` });
+    // Fix: Use the correct routing pattern for TanStack Router with params
+    navigate({ 
+      to: '/services/$serviceId',
+      params: { serviceId }
+    });
   };
 
   return (
