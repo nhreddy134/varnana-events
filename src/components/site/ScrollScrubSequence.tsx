@@ -6,6 +6,7 @@ interface ScrollScrubSequenceProps {
   baseUrl?: string;
   extension?: string;
   startFrame?: number;
+  showHeroOverlay?: boolean;
 }
 
 export default function ScrollScrubSequence({
@@ -13,6 +14,7 @@ export default function ScrollScrubSequence({
   baseUrl = "/frames/ezgif-frame-",
   extension = ".jpg",
   startFrame = 1,
+  showHeroOverlay = true,
 }: ScrollScrubSequenceProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -34,6 +36,12 @@ export default function ScrollScrubSequence({
 
   // Map smooth progress to frame index
   const frameIndex = useTransform(smoothProgress, [0, 1], [0, frameCount - 1]);
+
+  // Hero text opacity: fade in at 5%, stay visible until 70%, fade out by 100%
+  const heroOpacity = useTransform(smoothProgress, [0, 0.05, 0.7, 1], [0, 1, 1, 0]);
+
+  // Progress bar width (0-100% as user scrolls through sequence)
+  const progressWidth = useTransform(smoothProgress, [0, 1], ["0%", "100%"]);
 
   // Preload images
   useEffect(() => {
@@ -103,13 +111,13 @@ export default function ScrollScrubSequence({
   }, [images, frameIndex]);
 
   return (
-    <div ref={containerRef} className="relative h-[600vh] bg-black">
+    <div ref={containerRef} className="relative bg-black" style={{ height: "480vh" }}>
       <div className="sticky top-0 h-screen w-full overflow-hidden">
         <canvas
           ref={canvasRef}
           className="h-full w-full object-cover"
           style={{
-            filter: "brightness(0.75) contrast(1.1)", // Darkened slightly for better text contrast
+            filter: "brightness(0.75) contrast(1.1)",
           }}
         />
 
@@ -124,77 +132,41 @@ export default function ScrollScrubSequence({
           </div>
         )}
 
-        {/* Narrative Overlays with Improved Visibility */}
-        <div className="absolute inset-0 pointer-events-none z-10">
-          {/* Top & Bottom Vignette for text readability - Enhanced */}
-          <div className="absolute inset-0 bg-gradient-to-b from-black/70 via-black/20 to-black/70" />
+        {/* Hero Text Overlay */}
+        {showHeroOverlay && (
+          <div className="absolute inset-0 pointer-events-none z-10">
+            {/* Vignette for text readability */}
+            <div className="absolute inset-0 bg-gradient-to-b from-black/60 via-black/30 to-black/60" />
 
-          <motion.div
-            style={{
-              opacity: useTransform(smoothProgress, [0, 0.1, 0.2], [0, 1, 0]),
-              y: useTransform(smoothProgress, [0, 0.1, 0.2], [40, 0, -40]),
-            }}
-            className="absolute inset-0 flex items-center justify-center px-6"
-          >
-            <div className="text-center">
-              <h2 className="font-serif text-5xl md:text-8xl text-white italic leading-tight" style={{
-                textShadow: '0 4px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)',
-                WebkitTextStroke: '0.5px rgba(255,255,255,0.3)',
-              }}>
-                Every event is a <br /> 
-                <span className="text-gold" style={{
-                  textShadow: '0 4px 20px rgba(196,168,130,0.5), 0 2px 10px rgba(0,0,0,0.6)',
-                  WebkitTextStroke: '0.5px rgba(196,168,130,0.2)',
-                }}>living story.</span>
-              </h2>
-              <div className="mt-6 h-px w-32 bg-gold mx-auto" />
-            </div>
-          </motion.div>
+            {/* Main Hero Text */}
+            <motion.div
+              style={{ opacity: heroOpacity }}
+              className="absolute inset-0 flex items-center justify-center px-6"
+            >
+              <div className="text-center max-w-4xl">
+                <h1 className="font-serif text-6xl md:text-8xl lg:text-9xl leading-[1.1] text-ivory italic" style={{
+                  textShadow: '0 4px 40px rgba(0,0,0,0.6), 0 2px 20px rgba(0,0,0,0.4)',
+                  WebkitTextStroke: '0.5px rgba(255,255,255,0.2)',
+                }}>
+                  We craft moments
+                  <br />
+                  <span className="text-gold" style={{
+                    textShadow: '0 4px 40px rgba(196,168,130,0.5), 0 2px 20px rgba(0,0,0,0.6)',
+                    WebkitTextStroke: '0.5px rgba(196,168,130,0.3)',
+                  }}>
+                    that linger forever.
+                  </span>
+                </h1>
+              </div>
+            </motion.div>
+          </div>
+        )}
 
-          <motion.div
-            style={{
-              opacity: useTransform(smoothProgress, [0.4, 0.5, 0.6], [0, 1, 0]),
-              y: useTransform(smoothProgress, [0.4, 0.5, 0.6], [40, 0, -40]),
-            }}
-            className="absolute inset-0 flex items-center justify-center px-6"
-          >
-            <div className="text-center">
-              <h2 className="font-serif text-5xl md:text-8xl text-white italic leading-tight" style={{
-                textShadow: '0 4px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)',
-                WebkitTextStroke: '0.5px rgba(255,255,255,0.3)',
-              }}>
-                Composed with <br /> 
-                <span className="text-gold" style={{
-                  textShadow: '0 4px 20px rgba(196,168,130,0.5), 0 2px 10px rgba(0,0,0,0.6)',
-                  WebkitTextStroke: '0.5px rgba(196,168,130,0.2)',
-                }}>quiet intention.</span>
-              </h2>
-              <div className="mt-6 h-px w-32 bg-gold mx-auto" />
-            </div>
-          </motion.div>
-
-          <motion.div
-            style={{
-              opacity: useTransform(smoothProgress, [0.8, 0.9, 1], [0, 1, 0]),
-              y: useTransform(smoothProgress, [0.8, 0.9, 1], [40, 0, -40]),
-            }}
-            className="absolute inset-0 flex items-center justify-center px-6"
-          >
-            <div className="text-center">
-              <h2 className="font-serif text-5xl md:text-8xl text-white italic leading-tight" style={{
-                textShadow: '0 4px 20px rgba(0,0,0,0.6), 0 2px 8px rgba(0,0,0,0.4)',
-                WebkitTextStroke: '0.5px rgba(255,255,255,0.3)',
-              }}>
-                And details only <br /> 
-                <span className="text-gold" style={{
-                  textShadow: '0 4px 20px rgba(196,168,130,0.5), 0 2px 10px rgba(0,0,0,0.6)',
-                  WebkitTextStroke: '0.5px rgba(196,168,130,0.2)',
-                }}>you remember.</span>
-              </h2>
-              <div className="mt-6 h-px w-32 bg-gold mx-auto" />
-            </div>
-          </motion.div>
-        </div>
+        {/* Bottom Progress Bar */}
+        <motion.div
+          className="absolute bottom-0 left-0 h-1 bg-gradient-to-r from-gold via-gold to-gold/60 z-20"
+          style={{ width: progressWidth }}
+        />
       </div>
     </div>
   );

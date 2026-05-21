@@ -4,7 +4,6 @@ import { lazy, Suspense, useRef, useState, useEffect } from "react";
 import { ArrowRight, ArrowUpRight, Bell, X } from "lucide-react";
 import { AnimatedHeading } from "@/components/site/AnimatedHeading";
 import { ClientOnly } from "@/components/site/ClientOnly";
-import { HeroOrbs } from "@/components/site/HeroOrbs";
 import { GalleryCarousel } from "@/components/site/GalleryCarousel";
 import ScrollScrubSequence from "@/components/site/ScrollScrubSequence";
 import { GalleryWithLightbox } from "@/components/site/GalleryWithLightbox";
@@ -13,35 +12,7 @@ import { ServicesEnhanced } from "@/components/site/ServicesEnhanced";
 import TestimonialsCarousel from "@/components/site/TestimonialsCarousel";
 import { trpc } from '@/lib/trpc';
 
-const HeroParticles = lazy(() => import("@/components/three/HeroParticles").then(m => ({ default: m.HeroParticles })));
 const OrbitalRings = lazy(() => import("@/components/three/OrbitalRings").then(m => ({ default: m.OrbitalRings })));
-
-const AnimatedHeadingWords = ({ text, delay = 0 }: { text: string; delay?: number }) => {
-  return (
-    <motion.span
-      initial="hidden"
-      animate="show"
-      variants={{ show: { transition: { staggerChildren: 0.12, delayChildren: delay } } }}
-      className="inline-block"
-    >
-      {text.split(" ").map((w, i) => (
-        <motion.span
-          key={i}
-          className="inline-block mr-[0.25em]"
-          variants={{
-            hidden: { opacity: 0, y: 40, filter: "blur(12px)" },
-            show: {
-              opacity: 1, y: 0, filter: "blur(0px)",
-              transition: { type: "spring", stiffness: 60, damping: 18 },
-            },
-          }}
-        >
-          {w}
-        </motion.span>
-      ))}
-    </motion.span>
-  );
-};
 
 export const Route = createFileRoute("/")({
   head: () => ({
@@ -54,9 +25,6 @@ export const Route = createFileRoute("/")({
   }),
   component: HomePage,
 });
-
-const HERO_LINE_1 = "We craft moments";
-const HERO_LINE_2 = "that linger forever.";
 
 function HomePage() {
   const [announcement, setAnnouncement] = useState<any>(null);
@@ -108,80 +76,65 @@ function HomePage() {
         )}
       </AnimatePresence>
 
-      <Hero />
-      <ScrollScrubSequence />
+      {/* Hero Section: Mandap Scroll-Scrub with Text Overlay */}
+      <ScrollScrubSequence showHeroOverlay={true} />
+
+      {/* Bridge Section: Transition from dark mandap to ivory */}
+      <HeroContext />
+
+      {/* Categories Strip */}
       <CategoriesStrip />
+
+      {/* Services */}
       <ServicesEnhanced />
+
+      {/* Gallery */}
       <GalleryWithLightbox />
+
+      {/* Marquee */}
       <HorizontalMarquee />
+
+      {/* Why Varnana */}
       <WhyVarnana />
+
+      {/* Process Timeline */}
       <ProcessTimeline />
+
+      {/* Testimonials */}
       <TestimonialsCarousel />
+
+      {/* Final CTA */}
       <FinalCTA />
     </>
   );
 }
 
-/* ---------------- HERO ---------------- */
-function Hero() {
-  const ref = useRef<HTMLDivElement>(null);
-  const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end start"] });
-  const y = useTransform(scrollYProgress, [0, 1], [0, 120]);
-
+/* ============ HERO CONTEXT / BRIDGE ============ */
+function HeroContext() {
   return (
-    <section ref={ref} className="relative min-h-screen flex items-center overflow-hidden bg-ivory">
-      <ClientOnly>
-        <Suspense fallback={null}>
-          <div className="absolute inset-0 pointer-events-none md:pointer-events-auto">
-            <HeroParticles />
-          </div>
-        </Suspense>
-      </ClientOnly>
-      <HeroOrbs />
-
-      <motion.div style={{ y }} className="container-prose relative z-10 pt-32 pb-24 grid md:grid-cols-12 gap-10 items-center">
-        <div className="md:col-span-7">
-          <motion.p
-            initial={{ opacity: 0, x: -16 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ type: "spring", stiffness: 60, damping: 18, delay: 0.1 }}
-            className="text-[11px] uppercase tracking-[0.4em] text-gold mb-8 flex items-center gap-3"
-          >
+    <section className="bg-[#F0EDE8] py-20 md:py-32 relative overflow-hidden">
+      <div className="container-prose">
+        <motion.div
+          initial={{ opacity: 0, y: 40 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.8 }}
+          className="max-w-3xl mx-auto text-center"
+        >
+          <p className="text-[11px] uppercase tracking-[0.4em] text-gold mb-8 flex items-center justify-center gap-3">
             <span className="h-px w-10 bg-gold inline-block" />
             Creative Event Studio · Est. 2019
-          </motion.p>
-
-          <h1 className="font-display text-[clamp(2.6rem,7vw,6rem)] leading-[1.02] text-burgundy">
-            <AnimatedHeadingWords text={HERO_LINE_1} delay={0.3} />
-            <span className="block italic text-burgundy/90">
-              <AnimatedHeadingWords text={HERO_LINE_2} delay={0.7} />
-            </span>
-          </h1>
-
-          <motion.div
-            initial={{ scaleX: 0 }}
-            animate={{ scaleX: 1 }}
-            transition={{ duration: 1.1, ease: [0.65, 0, 0.35, 1], delay: 1.5 }}
-            style={{ transformOrigin: "left" }}
-            className="mt-8 h-px bg-gradient-to-r from-gold via-gold to-transparent w-[60%]"
-          />
-
-          <motion.p
-            initial={{ opacity: 0, y: 14 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 1.8 }}
-            className="mt-8 max-w-xl text-ink/80 text-lg leading-relaxed"
-          >
-            We design weddings, intimate celebrations and brand moments as
-            editorial stories — composed with light, scent, sound and the quiet
-            details only you remember.
-          </motion.p>
-
+            <span className="h-px w-10 bg-gold inline-block" />
+          </p>
+          <p className="text-xl md:text-2xl text-ink/80 leading-relaxed font-serif italic">
+            We design weddings, intimate celebrations and brand moments as editorial stories — composed with light, scent, sound and the quiet details only you remember.
+          </p>
           <motion.div
             initial={{ opacity: 0, scale: 0.94 }}
-            animate={{ opacity: 1, scale: 1 }}
-            transition={{ type: "spring", stiffness: 70, damping: 16, delay: 2.1 }}
-            className="mt-10 flex flex-wrap items-center gap-4"
+            whileInView={{ opacity: 1, scale: 1 }}
+            viewport={{ once: true }}
+            transition={{ type: "spring", stiffness: 70, damping: 16, delay: 0.3 }}
+            className="mt-12 flex flex-wrap items-center justify-center gap-4"
           >
             <motion.div whileHover={{ scale: 1.04 }} whileTap={{ scale: 0.97 }}>
               <Link to="/contact" className="inline-flex items-center gap-2 rounded-full bg-burgundy px-8 py-4 text-[12px] uppercase tracking-[0.22em] text-ivory hover:bg-burgundy-deep transition">
@@ -194,29 +147,16 @@ function Hero() {
               </Link>
             </motion.div>
           </motion.div>
-        </div>
-        <div className="hidden md:block md:col-span-5" />
-      </motion.div>
+        </motion.div>
+      </div>
 
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 2.4, duration: 0.8 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-3 z-10"
-      >
-        <span className="text-[10px] uppercase tracking-[0.4em] text-mute">Scroll</span>
-        <motion.span
-          animate={{ scaleY: [0.3, 1, 0.3] }}
-          transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
-          style={{ transformOrigin: "top" }}
-          className="block h-10 w-px bg-burgundy/60"
-        />
-      </motion.div>
+      {/* Subtle gradient bridge */}
+      <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-gold/30 to-transparent" />
     </section>
   );
 }
 
-/* ---------------- CATEGORIES ---------------- */
+/* ============ CATEGORIES STRIP ============ */
 const CATEGORIES = [
   { n: "01", label: "Weddings" },
   { n: "02", label: "Birthdays" },
@@ -260,7 +200,7 @@ function CategoriesStrip() {
   );
 }
 
-/* ---------------- WHY VARNANA ---------------- */
+/* ============ WHY VARNANA ============ */
 function WhyVarnana() {
   return (
     <section className="bg-burgundy-deep text-ivory py-28 md:py-36 overflow-hidden">
@@ -290,7 +230,7 @@ function WhyVarnana() {
   );
 }
 
-/* ---------------- PLACEHOLDERS FOR REMAINING ---------------- */
+/* ============ PROCESS TIMELINE ============ */
 const STEPS = [
   { n: "01", title: "Atmosphere", desc: "We begin with the feeling you want to evoke, not just the theme." },
   { n: "02", title: "Composition", desc: "Every vendor and detail is curated like a piece of art." },
@@ -323,6 +263,7 @@ function ProcessTimeline() {
   );
 }
 
+/* ============ FINAL CTA ============ */
 function FinalCTA() {
   return (
     <section className="py-28 bg-burgundy-deep text-ivory overflow-hidden relative">

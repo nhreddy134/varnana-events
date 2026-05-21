@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useScroll, useTransform } from "framer-motion";
 import { Menu, X } from "lucide-react";
 import logo from "@/assets/varnana.jpeg";
 
@@ -13,35 +13,79 @@ const NAV = [
 const BRAND = "VARNANA EVENTS";
 
 export function Navbar() {
-  const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const { scrollY } = useScroll();
+  
+  // Determine if we're in the mandap hero section (approximately 480vh tall)
+  // After ~480vh, transition to ivory background
+  const heroSectionHeight = typeof window !== 'undefined' ? window.innerHeight * 4.8 : 0;
+  const isInHeroSection = useTransform(
+    scrollY,
+    [0, heroSectionHeight * 0.8, heroSectionHeight],
+    [true, true, false]
+  );
 
-  useEffect(() => {
-    const onScroll = () => setScrolled(window.scrollY > 24);
-    onScroll();
-    window.addEventListener("scroll", onScroll, { passive: true });
-    return () => window.removeEventListener("scroll", onScroll);
-  }, []);
+  // Background opacity: transparent over hero, solid after
+  const bgOpacity = useTransform(
+    scrollY,
+    [heroSectionHeight * 0.7, heroSectionHeight * 0.95],
+    [0, 1]
+  );
+
+  // Text color: ivory over hero, burgundy after
+  const textColor = useTransform(
+    scrollY,
+    [heroSectionHeight * 0.7, heroSectionHeight * 0.95],
+    ["#F0EDE8", "#6B1A1A"]
+  );
+
+  const logoColor = useTransform(
+    scrollY,
+    [heroSectionHeight * 0.7, heroSectionHeight * 0.95],
+    ["#F0EDE8", "#6B1A1A"]
+  );
 
   return (
     <motion.header
       initial={{ y: -40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       transition={{ type: "spring", stiffness: 60, damping: 18 }}
-      className={`fixed inset-x-0 top-0 z-50 transition-all duration-500 ${
-        scrolled
-          ? "bg-[rgba(240,237,232,0.92)] backdrop-blur-xl border-b border-gold/30"
-          : "bg-transparent"
-      }`}
+      className="fixed inset-x-0 top-0 z-50 transition-all duration-500"
+      style={{
+        backgroundColor: useTransform(
+          bgOpacity,
+          (opacity) => `rgba(240, 237, 232, ${opacity})`
+        ),
+        backdropFilter: useTransform(
+          bgOpacity,
+          (opacity) => opacity > 0.5 ? "blur(12px)" : "blur(0px)"
+        ),
+        borderBottomColor: useTransform(
+          bgOpacity,
+          (opacity) => `rgba(196, 168, 130, ${opacity * 0.3})`
+        ),
+      }}
+      className="border-b"
     >
       <div className="container-prose flex h-20 items-center justify-between">
         <Link to="/" className="flex items-center gap-3 group">
-          <img src={logo} alt="Varnana Events" className="h-10 w-auto rounded-sm" />
+          <motion.img 
+            src={logo} 
+            alt="Varnana Events" 
+            className="h-10 w-auto rounded-sm" 
+            style={{
+              filter: useTransform(
+                logoColor,
+                (color) => color === "#F0EDE8" ? "brightness(1)" : "brightness(0.8)"
+              )
+            }}
+          />
           <motion.span
-            className="hidden sm:flex font-display text-burgundy text-lg tracking-[0.22em]"
+            className="hidden sm:flex font-display text-lg tracking-[0.22em]"
             initial="hidden"
             animate="show"
             variants={{ show: { transition: { staggerChildren: 0.04, delayChildren: 0.3 } } }}
+            style={{ color: textColor }}
           >
             {BRAND.split("").map((ch, i) => (
               <motion.span
@@ -68,7 +112,8 @@ export function Navbar() {
             >
               <Link
                 to={n.to}
-                className="text-[13px] uppercase tracking-[0.22em] text-ink hover:text-burgundy transition-colors"
+                className="text-[13px] uppercase tracking-[0.22em] transition-colors"
+                style={{ color: textColor }}
                 activeProps={{ className: "text-burgundy" }}
               >
                 {n.label}
@@ -85,19 +130,32 @@ export function Navbar() {
         >
           <Link
             to="/contact"
-            className="inline-flex items-center gap-2 rounded-full bg-burgundy px-6 py-3 text-[12px] uppercase tracking-[0.22em] text-ivory hover:bg-burgundy-deep transition-colors"
+            className="inline-flex items-center gap-2 rounded-full px-6 py-3 text-[12px] uppercase tracking-[0.22em] transition-all"
+            style={{
+              backgroundColor: useTransform(
+                scrollY,
+                [heroSectionHeight * 0.7, heroSectionHeight * 0.95],
+                ["rgba(107, 26, 26, 0.3)", "#6B1A1A"]
+              ),
+              color: useTransform(
+                scrollY,
+                [heroSectionHeight * 0.7, heroSectionHeight * 0.95],
+                ["#F0EDE8", "#F0EDE8"]
+              ),
+            }}
           >
             Plan Your Event
           </Link>
         </motion.div>
 
-        <button
+        <motion.button
           onClick={() => setOpen(true)}
-          className="md:hidden text-burgundy"
+          className="md:hidden"
+          style={{ color: textColor }}
           aria-label="Open menu"
         >
           <Menu size={26} />
-        </button>
+        </motion.button>
       </div>
 
       <AnimatePresence>
